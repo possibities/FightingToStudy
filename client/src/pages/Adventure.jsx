@@ -1,3 +1,82 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useGame } from '../state/GameStateContext.jsx';
+import { api } from '../api/client.js';
+import { useCountdown, formatMs } from '../hooks/useCountdown.js';
+import TimerRing from '../components/TimerRing.jsx';
+
 export default function Adventure() {
-  return <div className="adventure">⚔️ 整装待发。</div>;
+  const { state, refresh } = useGame();
+  const navigate = useNavigate();
+  const [events, setEvents] = useState(null);
+  const [finishedQuest, setFinishedQuest] = useState(null);
+  const [error, setError] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  const session = state?.runningSession;
+
+  async function complete() {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const data = await api(`/sessions/${session.id}/complete`, { method: 'POST' });
+      setFinishedQuest({ title: session.questTitle, type: session.questType, durationMin: session.durationMin, subjectTag: session.subjectTag });
+      setEvents(data.events);
+    } catch (e) {
+      setError(e.message);
+    }
+    setBusy(false);
+  }
+
+  async function abandon() {
+    if (!window.confirm('确定撤退吗?本次冒险将没有任何掉落。')) return;
+    try {
+      await api(`/sessions/${session.id}/abandon`, { method: 'POST' });
+      await refresh();
+      navigate('/');
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
+  async function done() {
+    await refresh();
+    navigate('/');
+  }
+
+  if (events) {
+    // T18 替换为 <RewardSequence events={events} quest={finishedQuest} onDone={done} />
+    return (
+      <div className="adventure">
+        <h2>⚔️ 委托完成!{finishedQuest?.title}</h2>
+        {events.map((e, i) => <p key={i}>{JSON.stringify(e)}</p>)}
+        <button className="btn" onClick={done}>回营地</button>
+      </div>
+    );
+  }
+  if (!state) return <div className="splash">🔥 正在点亮篝火…</div>;
+  if (!session) {
+    navigate('/');
+    return null;
+  }
+  const buddy = state.creatures.at(-1)?.emoji ?? '🔥';
+  return <Running session={session} buddy={buddy} onComplete={complete} onAbandon={abandon} error={error} busy={busy} />;
+}
+
+function Running({ session, buddy, onComplete, onAbandon, error, busy }) {
+  const { remainingMs, done } = useCountdown(session.endsAt);
+  const totalMs = new Date(session.endsAt).getTime() - new Date(session.startedAt).getTime();
+  return (
+    <div className="adventure">
+      <p className="dim">— 委托:{session.questTitle} —</p>
+      <TimerRing remainingMs={remainingMs} totalMs={totalMs} label={done ? '时辰已到' : formatMs(remainingMs)} />
+      <div className="adventure-buddy">{buddy}</div>
+      <p className="dim">{done ? '冒险归来,清点战利品吧!' : '伙伴在篝火旁等你凯旋…'}</p>
+      {error && <p className="error-line">{error}</p>}
+      {done || error
+        ? <button className="btn btn-big" disabled={busy} onClick={onComplete}>{error ? '重试结算' : '🎺 凯旋归来'}</button>
+        : <button className="btn-ghost retreat" onClick={onAbandon}>中途撤退(本次无掉落)</button>}
+    </div>
+  );
 }
