@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
-import { makeTestApp, seqRng } from './helpers.js';
+import { makeTestApp, seqRng, grant } from './helpers.js';
 
 async function startQuest(app, { title = '晨读', durationMin = 25 } = {}) {
   const q = (await request(app).post('/api/quests').send({ title, durationMin })).body;
@@ -113,6 +113,22 @@ describe('settlement', () => {
     expect((await request(app).post(`/api/quests/${quest.id}/start`)).status).toBe(200);
     expect((await request(app).post(`/api/sessions/${sessionId}/abandon`)).status).toBe(409);
     expect((await request(app).post(`/api/sessions/${sessionId}/complete`)).status).toBe(409);
+  });
+
+  it('abandon drops 1-2 random materials when owned', async () => {
+    const { app, db } = makeTestApp({ rng: seqRng([0.0, 0.99]) }); // 选库存第一种,数量 1+floor(0.99*2)=2
+    grant(db, 'wood', 10);
+    const { sessionId } = await startQuest(app);
+    const res = await request(app).post(`/api/sessions/${sessionId}/abandon`);
+    expect(res.body.lost).toMatchObject({ key: 'wood', qty: 2 });
+    expect(db.prepare("SELECT qty FROM inventory WHERE item_key='wood'").get().qty).toBe(8);
+  });
+
+  it('abandon loses nothing when inventory is empty', async () => {
+    const { app } = makeTestApp();
+    const { sessionId } = await startQuest(app);
+    const res = await request(app).post(`/api/sessions/${sessionId}/abandon`);
+    expect(res.body.lost).toBeNull();
   });
 
   it('updates pity counter across settlements', async () => {

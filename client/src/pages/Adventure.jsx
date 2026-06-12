@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../state/GameStateContext.jsx';
+import { useToast } from '../components/Toast.jsx';
 import { api } from '../api/client.js';
 import { useCountdown, formatMs } from '../hooks/useCountdown.js';
 import TimerRing from '../components/TimerRing.jsx';
@@ -8,6 +9,7 @@ import RewardSequence from '../components/RewardSequence.jsx';
 
 export default function Adventure() {
   const { state, refresh } = useGame();
+  const toast = useToast();
   const navigate = useNavigate();
   const [events, setEvents] = useState(null);
   const [finishedQuest, setFinishedQuest] = useState(null);
@@ -36,9 +38,10 @@ export default function Adventure() {
   }
 
   async function abandon() {
-    if (!window.confirm('确定撤退吗?本次冒险将没有任何掉落。')) return;
+    if (!window.confirm('确定撤退吗?本次冒险无掉落,慌乱中还可能弄丢材料。')) return;
     try {
-      await api(`/sessions/${session.id}/abandon`, { method: 'POST' });
+      const r = await api(`/sessions/${session.id}/abandon`, { method: 'POST' });
+      if (r.lost) toast.show(`🏃 仓促撤退,路上掉了 ${r.lost.emoji}${r.lost.name} ×${r.lost.qty}`);
       await refresh();
       navigate('/');
     } catch (e) {
@@ -60,10 +63,26 @@ export default function Adventure() {
 
 const ADV_STARS = [[6, 8], [14, 22], [24, 12], [34, 28], [44, 7], [55, 18], [64, 30], [72, 10], [81, 24], [90, 14], [12, 40], [88, 38], [50, 36], [70, 44]];
 
+const CHEERS = [
+  '你专注的样子在发光 ✨',
+  '再坚持一下,篝火替你留着 🔥',
+  '别看手机,看我 👀',
+  '这一局打完,蛋说不定就孵了 🥚',
+  '风很安静,正适合赶路',
+  '凯旋的号角已经在路上 🎺',
+  '今天的你比昨天强一点点',
+  '我赌一颗松果,你能撑到最后 🌰',
+];
+
 function Running({ session, buddy, onComplete, onAbandon, error, busy }) {
   const { remainingMs, done } = useCountdown(session.endsAt);
   const totalMs = new Date(session.endsAt).getTime() - new Date(session.startedAt).getTime();
   const pct = totalMs > 0 ? Math.min(100, Math.round(((totalMs - remainingMs) / totalMs) * 100)) : 0;
+  const [cheer, setCheer] = useState(() => CHEERS[Math.floor(Math.random() * CHEERS.length)]);
+  useEffect(() => {
+    const t = setInterval(() => setCheer(CHEERS[Math.floor(Math.random() * CHEERS.length)]), 18000);
+    return () => clearInterval(t);
+  }, []);
   return (
     <div className="adventure">
       <div className="adventure-stars">
@@ -78,8 +97,8 @@ function Running({ session, buddy, onComplete, onAbandon, error, busy }) {
         <TimerRing remainingMs={remainingMs} totalMs={totalMs} label={done ? '时辰已到' : formatMs(remainingMs)} />
       </div>
       <small className="dim">旅程 {done ? 100 : pct}%</small>
+      <div className="speech">{done ? '冒险归来,清点战利品吧!' : cheer}</div>
       <div className="adventure-buddy">{buddy}</div>
-      <p className="dim">{done ? '冒险归来,清点战利品吧!' : '伙伴在篝火旁等你凯旋…'}</p>
       {error && <p className="error-line">{error}</p>}
       {done || error
         ? <button className="btn btn-big" disabled={busy} onClick={onComplete}>{error ? '重试结算' : '🎺 凯旋归来'}</button>

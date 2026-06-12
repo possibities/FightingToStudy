@@ -20,7 +20,7 @@ describe('RewardSequence', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
-  it('reveals events one by one, then shows the return button', () => {
+  it('reveals events one by one, with a flip card for drops', () => {
     const onDone = vi.fn();
     render(
       <ToastProvider>
@@ -34,8 +34,11 @@ describe('RewardSequence', () => {
     act(() => { vi.advanceTimersByTime(900); });
     expect(screen.getByText(/金币 \+25/)).toBeInTheDocument();
     act(() => { vi.advanceTimersByTime(900); });
+    // 掉落以扣牌出现:翻开前看不到内容,也不能回营地
+    expect(screen.queryByText(/稀有的蛋/)).toBeNull();
+    expect(screen.queryByText('回营地')).toBeNull();
+    fireEvent.click(screen.getByText(/点击翻开/));
     expect(screen.getByText(/稀有的蛋/)).toBeInTheDocument();
-    act(() => { vi.advanceTimersByTime(900); });
     fireEvent.click(screen.getByText('回营地'));
     expect(onDone).toHaveBeenCalled();
   });

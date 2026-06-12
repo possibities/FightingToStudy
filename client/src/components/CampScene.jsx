@@ -15,6 +15,17 @@ const SLOT_POS = [
 
 const STARS = [[8, 12], [20, 6], [33, 18], [47, 9], [61, 14], [72, 7], [85, 16], [15, 26], [55, 24], [90, 28], [40, 30], [78, 33]];
 
+// 由 id 派生稳定的伪随机站位与游走节奏,刷新不跳变
+function creatureStyle(id, i) {
+  const h = (id * 2654435761) >>> 0;
+  return {
+    left: `${6 + (h % 78)}%`,
+    bottom: `${4 + ((h >> 7) % 14)}%`,
+    animationDuration: `${7 + ((h >> 3) % 7)}s`,
+    animationDelay: `${(i % 5) * 0.8}s`,
+  };
+}
+
 export default function CampScene() {
   const { state } = useGame();
   const [slot, setSlot] = useState(null);
@@ -49,7 +60,7 @@ export default function CampScene() {
       })}
       <div className="scene-creatures">
         {state.creatures.map((c, i) => (
-          <span key={c.id} className="creature" style={{ animationDelay: `${(i % 4) * 0.8}s` }} title={c.name}>{c.emoji}</span>
+          <span key={c.id} className="creature" style={creatureStyle(c.id, i)} title={c.name}>{c.emoji}</span>
         ))}
       </div>
       {slot !== null && <BuildMenu slotIndex={slot} building={bySlot[slot] ?? null} onClose={() => setSlot(null)} />}

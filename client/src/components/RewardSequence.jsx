@@ -6,6 +6,8 @@ import { playSfx } from '../audio/sfx.js';
 import { RARITY_NAMES } from '../utils/rarity.js';
 
 const STEP_MS = 900;
+const FLIP_TYPES = ['egg', 'hatch'];
+const RARE_TIERS = ['rare', 'epic', 'legendary'];
 
 function eventView(e) {
   switch (e.type) {
@@ -20,21 +22,62 @@ function eventView(e) {
   }
 }
 
+function Burst() {
+  const parts = Array.from({ length: 12 }, (_, i) => {
+    const angle = (i / 12) * Math.PI * 2;
+    const dist = 42 + (i % 3) * 24;
+    return { dx: Math.cos(angle) * dist, dy: Math.sin(angle) * dist, delay: (i % 4) * 0.05 };
+  });
+  return (
+    <span className="burst">
+      {parts.map((p, i) => (
+        <span key={i} className="burst-p" style={{ '--dx': `${p.dx}px`, '--dy': `${p.dy}px`, animationDelay: `${p.delay}s` }}>✨</span>
+      ))}
+    </span>
+  );
+}
+
+function FlipCard({ view, rarity, onFlip }) {
+  const [flipped, setFlipped] = useState(false);
+  const rare = RARE_TIERS.includes(rarity);
+  if (!flipped) {
+    return (
+      <button type="button" className="reward-item flip-back" onClick={() => { setFlipped(true); onFlip(rare); }}>
+        🎴 点击翻开战利品…
+      </button>
+    );
+  }
+  return (
+    <div className={`reward-item flip-swap ${view.cls || ''}`} style={{ position: 'relative' }}>
+      <span className="reward-icon">{view.icon}</span>{view.text}
+      {rare && <Burst />}
+    </div>
+  );
+}
+
 export default function RewardSequence({ events, quest, onDone }) {
   const [shown, setShown] = useState(0);
+  const [waitingFlip, setWaitingFlip] = useState(false);
   const [busy, setBusy] = useState(false);
   const toast = useToast();
 
   useEffect(() => { playSfx('complete'); }, []);
 
   useEffect(() => {
-    if (shown >= events.length) return;
-    const e = events[shown];
-    if (e.type === 'levelup') playSfx('levelup');
-    else if ((e.type === 'egg' || e.type === 'hatch') && ['rare', 'epic', 'legendary'].includes(e.rarity ?? e.species?.rarity)) playSfx('rare');
-    const t = setTimeout(() => setShown(s => s + 1), STEP_MS);
+    if (shown >= events.length || waitingFlip) return;
+    const next = events[shown];
+    const t = setTimeout(() => {
+      if (next.type === 'levelup') playSfx('levelup');
+      if (FLIP_TYPES.includes(next.type)) setWaitingFlip(true); // 扣牌等待玩家翻开,序列暂停
+      setShown(s => s + 1);
+    }, STEP_MS);
     return () => clearTimeout(t);
-  }, [shown, events]);
+  }, [shown, events, waitingFlip]);
+
+  function handleFlip(rare) {
+    setWaitingFlip(false);
+    if (rare) playSfx('rare');
+  }
 
   async function again() {
     if (busy) return;
@@ -47,7 +90,7 @@ export default function RewardSequence({ events, quest, onDone }) {
     onDone();
   }
 
-  const allShown = shown >= events.length;
+  const allShown = shown >= events.length && !waitingFlip;
   return (
     <div className="reward-mask">
       <div className="reward-panel card">
@@ -56,9 +99,10 @@ export default function RewardSequence({ events, quest, onDone }) {
           {events.slice(0, shown).map((e, i) => {
             const v = eventView(e);
             return (
-              <motion.div key={i} className={`reward-item ${v.cls || ''}`}
-                initial={{ opacity: 0, y: 16, scale: 0.92 }} animate={{ opacity: 1, y: 0, scale: 1 }}>
-                <span className="reward-icon">{v.icon}</span>{v.text}
+              <motion.div key={i} initial={{ opacity: 0, y: 16, scale: 0.92 }} animate={{ opacity: 1, y: 0, scale: 1 }}>
+                {FLIP_TYPES.includes(e.type)
+                  ? <FlipCard view={v} rarity={e.rarity ?? e.species?.rarity} onFlip={handleFlip} />
+                  : <div className={`reward-item ${v.cls || ''}`}><span className="reward-icon">{v.icon}</span>{v.text}</div>}
               </motion.div>
             );
           })}
