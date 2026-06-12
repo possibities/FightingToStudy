@@ -3,12 +3,14 @@ import { localDateStr } from '../utils/dates.js';
 import { expToNext, titleFor } from '../services/leveling.js';
 import { MATERIAL_MAP, SPECIES, SPECIES_MAP, BUILDINGS, TITLES } from '../content/index.js';
 import { toQuestJson } from './quests.js';
+import { ensureDailyQuests } from '../services/dailyQuests.js';
 
 export function createStateRouter({ db, now, rng }) {
   const router = Router();
 
   router.get('/', (req, res, next) => {
     try {
+      ensureDailyQuests(db, now, rng);
       const today = localDateStr(now());
       const welcomeBack = null; // T13 替换为 checkWelcomeBack(db, now, rng)
       const player = db.prepare('SELECT * FROM player WHERE id=1').get();
