@@ -5,6 +5,7 @@ import { useToast } from '../components/Toast.jsx';
 import { api } from '../api/client.js';
 import QuestCard from '../components/QuestCard.jsx';
 import CreateQuestModal from '../components/CreateQuestModal.jsx';
+import CampScene from '../components/CampScene.jsx';
 
 export default function Camp() {
   const { state, refresh } = useGame();
@@ -40,7 +41,7 @@ export default function Camp() {
 
   return (
     <div className="camp-split">
-      <section className="card scene-placeholder">🏕️ {state.creatures.map(c => c.emoji).join(' ') || '营地静悄悄的…'}</section>
+      <CampScene />
       <section className="quest-panel">
         <h3 className="panel-title">📜 今日委托</h3>
         {daily.map(q => <QuestCard key={q.id} quest={q} onStart={startQuest} />)}
