@@ -6,6 +6,7 @@ import { createQuestsRouter } from './routes/quests.js';
 import { createSessionsRouter } from './routes/sessions.js';
 import { createCollectionRouter } from './routes/collection.js';
 import { createStatsRouter } from './routes/stats.js';
+import { createBuildingsRouter } from './routes/buildings.js';
 
 function ensureBootstrap(db, now) {
   const nowIso = now().toISOString();
@@ -24,6 +25,7 @@ export function createApp({ db, now = () => new Date(), rng = Math.random, stati
   app.use('/api/sessions', createSessionsRouter(deps));
   app.use('/api/collection', createCollectionRouter(deps));
   app.use('/api/stats', createStatsRouter(deps));
+  app.use('/api/buildings', createBuildingsRouter(deps));
   if (staticDir) {
     app.use(express.static(staticDir));
     app.get(/^(?!\/api).*/, (req, res) => res.sendFile(path.join(staticDir, 'index.html')));
