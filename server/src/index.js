@@ -1,5 +1,16 @@
-import express from 'express';
+import path from 'node:path';
+import { mkdirSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { createDb, DATA_DIR, DB_PATH } from './db/index.js';
+import { backupDb } from './db/backup.js';
+import { createApp } from './app.js';
 
-const app = express();
-app.get('/api/ping', (req, res) => res.json({ ok: true, name: '星夜营地' }));
-app.listen(3001, () => console.log('API on http://localhost:3001'));
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+mkdirSync(DATA_DIR, { recursive: true });
+backupDb();
+const db = createDb(DB_PATH);
+const staticDir = path.resolve(__dirname, '../../client/dist');
+const app = createApp({ db, staticDir });
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => console.log(`🏕️ 星夜营地: http://localhost:${PORT}`));
