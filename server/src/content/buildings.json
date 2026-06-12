@@ -1,0 +1,10 @@
+[
+  { "key": "campfire", "name": "篝火", "emoji": "🔥", "buildable": false, "desc": "营地之心,永远为你燃烧。", "effect": null, "baseCost": {} },
+  { "key": "tent", "name": "帐篷", "emoji": "⛺", "buildable": true, "desc": "温暖的住处让人更勤快。", "effect": { "type": "gold_pct", "value": 3 }, "baseCost": { "wood": 5 } },
+  { "key": "library", "name": "图书角", "emoji": "📚", "buildable": true, "desc": "知识的殿堂。", "effect": { "type": "exp_pct", "value": 5 }, "baseCost": { "wood": 10, "stone": 5 } },
+  { "key": "workshop", "name": "工坊", "emoji": "⚒️", "buildable": true, "desc": "出击时多带回一份材料。", "effect": { "type": "material_flat", "value": 1 }, "baseCost": { "wood": 8, "stone": 8 } },
+  { "key": "herb_garden", "name": "药草园", "emoji": "🌿", "buildable": true, "desc": "草药香气让头脑更清醒。", "effect": { "type": "exp_pct", "value": 3 }, "baseCost": { "wood": 6, "stardust": 1 } },
+  { "key": "treasury", "name": "宝物库", "emoji": "💰", "buildable": true, "desc": "妥善保管,钱生钱。", "effect": { "type": "gold_pct", "value": 5 }, "baseCost": { "stone": 12, "stardust": 2 } },
+  { "key": "watchtower", "name": "瞭望塔", "emoji": "🗼", "buildable": true, "desc": "看得更远,发现更多蛋。", "effect": { "type": "egg_pct_points", "value": 1 }, "baseCost": { "wood": 12, "stone": 10 } },
+  { "key": "observatory", "name": "星象台", "emoji": "🔭", "buildable": true, "desc": "聆听星辰,蛋的眷顾更多。", "effect": { "type": "egg_pct_points", "value": 2 }, "baseCost": { "stone": 10, "stardust": 3, "crystal": 1 } }
+]

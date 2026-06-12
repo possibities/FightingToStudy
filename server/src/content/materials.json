@@ -1,0 +1,6 @@
+[
+  { "key": "wood", "name": "木材", "emoji": "🪵", "weight": 55 },
+  { "key": "stone", "name": "石料", "emoji": "🪨", "weight": 30 },
+  { "key": "stardust", "name": "星尘", "emoji": "✨", "weight": 12 },
+  { "key": "crystal", "name": "知识水晶", "emoji": "🔮", "weight": 3 }
+]

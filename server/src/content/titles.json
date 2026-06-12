@@ -1,0 +1,12 @@
+[
+  { "level": 1, "title": "见习学者" },
+  { "level": 5, "title": "青铜探索者" },
+  { "level": 10, "title": "白银远行者" },
+  { "level": 15, "title": "黄金开拓者" },
+  { "level": 20, "title": "秘银猎手" },
+  { "level": 25, "title": "星辉骑士" },
+  { "level": 30, "title": "贤者之徒" },
+  { "level": 35, "title": "奥术贤者" },
+  { "level": 40, "title": "传奇冒险家" },
+  { "level": 45, "title": "星夜守望者" }
+]
