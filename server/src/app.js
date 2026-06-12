@@ -3,6 +3,7 @@ import path from 'node:path';
 import { MATERIALS } from './content/index.js';
 import { createStateRouter } from './routes/state.js';
 import { createQuestsRouter } from './routes/quests.js';
+import { createSessionsRouter } from './routes/sessions.js';
 
 function ensureBootstrap(db, now) {
   const nowIso = now().toISOString();
@@ -18,6 +19,7 @@ export function createApp({ db, now = () => new Date(), rng = Math.random, stati
   const deps = { db, now, rng };
   app.use('/api/state', createStateRouter(deps));
   app.use('/api/quests', createQuestsRouter(deps));
+  app.use('/api/sessions', createSessionsRouter(deps));
   if (staticDir) {
     app.use(express.static(staticDir));
     app.get(/^(?!\/api).*/, (req, res) => res.sendFile(path.join(staticDir, 'index.html')));
