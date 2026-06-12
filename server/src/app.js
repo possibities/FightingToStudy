@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'node:path';
 import { MATERIALS } from './content/index.js';
 import { createStateRouter } from './routes/state.js';
+import { createQuestsRouter } from './routes/quests.js';
 
 function ensureBootstrap(db, now) {
   const nowIso = now().toISOString();
@@ -16,6 +17,7 @@ export function createApp({ db, now = () => new Date(), rng = Math.random, stati
   app.use(express.json());
   const deps = { db, now, rng };
   app.use('/api/state', createStateRouter(deps));
+  app.use('/api/quests', createQuestsRouter(deps));
   if (staticDir) {
     app.use(express.static(staticDir));
     app.get(/^(?!\/api).*/, (req, res) => res.sendFile(path.join(staticDir, 'index.html')));
