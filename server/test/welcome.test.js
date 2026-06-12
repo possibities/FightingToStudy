@@ -22,4 +22,14 @@ describe('welcome back gift', () => {
     db.prepare("UPDATE player SET last_completed_at='2026-06-10T10:00:00.000Z' WHERE id=1").run();
     expect((await request(app).get('/api/state')).body.welcomeBack).toBeNull();
   });
+
+  it('treats the last claim as activity: no daily re-claim while idle', async () => {
+    const { app, db, clock } = makeTestApp();
+    db.prepare("UPDATE player SET last_completed_at='2026-06-01T10:00:00.000Z' WHERE id=1").run();
+    await request(app).get('/api/state'); // 第一次领取(2026-06-11)
+    clock.current = new Date('2026-06-12T10:00:00'); // 次日仍未学习
+    const res = await request(app).get('/api/state');
+    expect(res.body.welcomeBack).toBeNull();
+    expect(res.body.player.gold).toBe(200); // 不再加钱
+  });
 });

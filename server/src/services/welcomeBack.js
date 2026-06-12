@@ -14,6 +14,8 @@ export function checkWelcomeBack(db, now, rng) {
   const today = localDateStr(now());
   const claimed = db.prepare("SELECT value FROM settings WHERE key='welcome_back_date'").get();
   if (claimed?.value === today) return null;
+  // 上次领取也算"活跃":只开页面不学习,不能天天白领礼包
+  if (claimed?.value && (now().getTime() - new Date(claimed.value).getTime()) / 86400000 < AWAY_DAYS) return null;
 
   const gained = {};
   for (let i = 0; i < GIFT_MATERIAL_COUNT; i++) {

@@ -16,6 +16,7 @@ describe('quests', () => {
     expect((await request(app).post('/api/quests').send({ title: 'x', durationMin: 3 })).status).toBe(400);
     expect((await request(app).post('/api/quests').send({ title: 'x', durationMin: 121 })).status).toBe(400);
     expect((await request(app).post('/api/quests').send({ title: 'x'.repeat(31), durationMin: 30 })).status).toBe(400);
+    expect((await request(app).post('/api/quests').send({ title: 'x', durationMin: 30, subjectTag: 't'.repeat(21) })).status).toBe(400);
   });
 
   it('starts a session and computes ends_at from duration', async () => {

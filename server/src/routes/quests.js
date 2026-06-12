@@ -11,6 +11,8 @@ export function createQuestsRouter({ db, now }) {
         throw new HttpError(400, '标题需为 1~30 个字');
       if (!Number.isInteger(durationMin) || durationMin < 5 || durationMin > 120)
         throw new HttpError(400, '时长需为 5~120 分钟的整数');
+      if (subjectTag != null && (typeof subjectTag !== 'string' || subjectTag.trim().length > 20))
+        throw new HttpError(400, '标签需不超过 20 个字');
       const info = db.prepare(
         "INSERT INTO quests (title, type, duration_min, subject_tag, status, created_at) VALUES (?, 'custom', ?, ?, 'ready', ?)"
       ).run(title.trim(), durationMin, (typeof subjectTag === 'string' && subjectTag.trim()) || null, now().toISOString());

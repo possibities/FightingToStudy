@@ -14,3 +14,9 @@ const staticDir = path.resolve(__dirname, '../../client/dist');
 const app = createApp({ db, staticDir });
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`🏕️ 星夜营地: http://localhost:${PORT}`));
+
+// 优雅关闭:把 WAL 落盘,保证下次启动备份完整
+process.on('SIGINT', () => {
+  db.close();
+  process.exit(0);
+});

@@ -22,6 +22,7 @@ function eventView(e) {
 
 export default function RewardSequence({ events, quest, onDone }) {
   const [shown, setShown] = useState(0);
+  const [busy, setBusy] = useState(false);
   const toast = useToast();
 
   useEffect(() => { playSfx('complete'); }, []);
@@ -36,6 +37,8 @@ export default function RewardSequence({ events, quest, onDone }) {
   }, [shown, events]);
 
   async function again() {
+    if (busy) return;
+    setBusy(true);
     try {
       await api('/quests', { method: 'POST', body: { title: quest.title, durationMin: quest.durationMin, subjectTag: quest.subjectTag } });
     } catch (e) {
@@ -62,7 +65,7 @@ export default function RewardSequence({ events, quest, onDone }) {
         </AnimatePresence>
         {allShown && (
           <div className="reward-actions">
-            {quest?.type === 'custom' && <button className="btn-ghost" onClick={again}>🔁 再来一次</button>}
+            {quest?.type === 'custom' && <button className="btn-ghost" disabled={busy} onClick={again}>🔁 再来一次</button>}
             <button className="btn" onClick={onDone}>回营地</button>
           </div>
         )}

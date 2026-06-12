@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../state/GameStateContext.jsx';
 import { api } from '../api/client.js';
@@ -15,6 +15,11 @@ export default function Adventure() {
   const [busy, setBusy] = useState(false);
 
   const session = state?.runningSession;
+
+  // 无进行中冒险时回营地(放在 effect 里,避免渲染期间导航)
+  useEffect(() => {
+    if (state && !session && !events) navigate('/');
+  }, [state, session, events, navigate]);
 
   async function complete() {
     if (busy) return;
@@ -48,10 +53,7 @@ export default function Adventure() {
 
   if (events) return <RewardSequence events={events} quest={finishedQuest} onDone={done} />;
   if (!state) return <div className="splash">🔥 正在点亮篝火…</div>;
-  if (!session) {
-    navigate('/');
-    return null;
-  }
+  if (!session) return null;
   const buddy = state.creatures.at(-1)?.emoji ?? '🔥';
   return <Running session={session} buddy={buddy} onComplete={complete} onAbandon={abandon} error={error} busy={busy} />;
 }
