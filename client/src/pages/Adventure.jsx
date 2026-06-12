@@ -15,6 +15,7 @@ export default function Adventure() {
   const [finishedQuest, setFinishedQuest] = useState(null);
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [showRetreat, setShowRetreat] = useState(false);
 
   const session = state?.runningSession;
 
@@ -38,7 +39,7 @@ export default function Adventure() {
   }
 
   async function abandon() {
-    if (!window.confirm('确定撤退吗?本次冒险无掉落,慌乱中还可能弄丢材料。')) return;
+    setShowRetreat(false);
     try {
       const r = await api(`/sessions/${session.id}/abandon`, { method: 'POST' });
       if (r.lost) toast.show(`🏃 仓促撤退,路上掉了 ${r.lost.emoji}${r.lost.name} ×${r.lost.qty}`);
@@ -58,7 +59,29 @@ export default function Adventure() {
   if (!state) return <div className="splash">🔥 正在点亮篝火…</div>;
   if (!session) return null;
   const buddy = state.creatures.at(-1)?.emoji ?? '🔥';
-  return <Running session={session} buddy={buddy} onComplete={complete} onAbandon={abandon} error={error} busy={busy} />;
+  return (
+    <>
+      <Running session={session} buddy={buddy} onComplete={complete} onAbandon={() => setShowRetreat(true)} error={error} busy={busy} />
+      {showRetreat && (
+        <div className="modal-mask" onClick={() => setShowRetreat(false)}>
+          <div className="modal card retreat-modal" onClick={e => e.stopPropagation()}>
+            <div className="retreat-buddy">{buddy}</div>
+            <div className="speech">真的要走吗?战利品会留在森林里的…</div>
+            <h3>🏳️ 中途撤退</h3>
+            <ul className="retreat-warns dim">
+              <li>本次专注的所有掉落将泡汤</li>
+              <li>慌乱中可能弄丢 1~2 个材料</li>
+              <li>委托不会锁定,随时可以再出发</li>
+            </ul>
+            <div className="modal-actions">
+              <button className="btn-ghost btn-danger" onClick={abandon}>确认撤退</button>
+              <button className="btn" onClick={() => setShowRetreat(false)}>🔥 再坚持一下</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
 
 const ADV_STARS = [[6, 8], [14, 22], [24, 12], [34, 28], [44, 7], [55, 18], [64, 30], [72, 10], [81, 24], [90, 14], [12, 40], [88, 38], [50, 36], [70, 44]];
@@ -91,6 +114,11 @@ function Running({ session, buddy, onComplete, onAbandon, error, busy }) {
         ))}
         <span className="shooting-star" />
         <span className="shooting-star delay" />
+        <span className="firefly" style={{ left: '12%', bottom: '14%', animationDuration: '8s, 2.4s' }} />
+        <span className="firefly" style={{ left: '82%', bottom: '10%', animationDuration: '10s, 2.4s', animationDelay: '1.2s, 1.2s' }} />
+        <span className="firefly" style={{ left: '64%', bottom: '20%', animationDuration: '9s, 2.4s', animationDelay: '0.6s, 0.6s' }} />
+        <div className="hill hill-far adv-hill-far" />
+        <div className="hill hill-mid adv-hill-mid" />
       </div>
       <p className="dim">— 委托:{session.questTitle}{session.subjectTag ? ` · ${session.subjectTag}` : ''} —</p>
       <div className="timer-aura">
