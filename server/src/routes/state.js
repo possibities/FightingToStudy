@@ -4,6 +4,7 @@ import { expToNext, titleFor } from '../services/leveling.js';
 import { MATERIAL_MAP, SPECIES, SPECIES_MAP, BUILDINGS, TITLES } from '../content/index.js';
 import { toQuestJson } from './quests.js';
 import { ensureDailyQuests } from '../services/dailyQuests.js';
+import { checkWelcomeBack } from '../services/welcomeBack.js';
 
 export function createStateRouter({ db, now, rng }) {
   const router = Router();
@@ -12,7 +13,7 @@ export function createStateRouter({ db, now, rng }) {
     try {
       ensureDailyQuests(db, now, rng);
       const today = localDateStr(now());
-      const welcomeBack = null; // T13 替换为 checkWelcomeBack(db, now, rng)
+      const welcomeBack = checkWelcomeBack(db, now, rng);
       const player = db.prepare('SELECT * FROM player WHERE id=1').get();
       const resources = db.prepare('SELECT item_key, qty FROM inventory').all()
         .map(r => ({ key: r.item_key, name: MATERIAL_MAP[r.item_key].name, emoji: MATERIAL_MAP[r.item_key].emoji, qty: r.qty }));
