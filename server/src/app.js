@@ -4,6 +4,8 @@ import { MATERIALS } from './content/index.js';
 import { createStateRouter } from './routes/state.js';
 import { createQuestsRouter } from './routes/quests.js';
 import { createSessionsRouter } from './routes/sessions.js';
+import { createCollectionRouter } from './routes/collection.js';
+import { createStatsRouter } from './routes/stats.js';
 
 function ensureBootstrap(db, now) {
   const nowIso = now().toISOString();
@@ -20,6 +22,8 @@ export function createApp({ db, now = () => new Date(), rng = Math.random, stati
   app.use('/api/state', createStateRouter(deps));
   app.use('/api/quests', createQuestsRouter(deps));
   app.use('/api/sessions', createSessionsRouter(deps));
+  app.use('/api/collection', createCollectionRouter(deps));
+  app.use('/api/stats', createStatsRouter(deps));
   if (staticDir) {
     app.use(express.static(staticDir));
     app.get(/^(?!\/api).*/, (req, res) => res.sendFile(path.join(staticDir, 'index.html')));
