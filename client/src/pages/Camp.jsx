@@ -35,6 +35,15 @@ export default function Camp() {
     }
   }
 
+  async function repeatQuest(quest) {
+    try {
+      await api('/quests', { method: 'POST', body: { title: quest.title, durationMin: quest.durationMin, subjectTag: quest.subjectTag } });
+      await refresh();
+    } catch (e) {
+      toast.show(e.message);
+    }
+  }
+
   const daily = state.quests.filter(q => q.type === 'daily');
   const custom = state.quests.filter(q => q.type === 'custom');
   const egg = state.incubatingEgg;
@@ -46,7 +55,7 @@ export default function Camp() {
         <h3 className="panel-title">📜 今日委托</h3>
         {daily.map(q => <QuestCard key={q.id} quest={q} onStart={startQuest} />)}
         <h3 className="panel-title">🗺️ 自由委托</h3>
-        {custom.map(q => <QuestCard key={q.id} quest={q} onStart={startQuest} />)}
+        {custom.map(q => <QuestCard key={q.id} quest={q} onStart={startQuest} onRepeat={repeatQuest} />)}
         <button className="btn-ghost quest-add" onClick={() => setShowCreate(true)}>＋ 自建委托</button>
         {egg && (
           <div className="card egg-card">

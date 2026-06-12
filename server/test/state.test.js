@@ -19,4 +19,15 @@ describe('GET /api/state', () => {
     expect(res.body.welcomeBack).toBeNull();
     expect(typeof res.body.serverNow).toBe('string');
   });
+
+  it('keeps today-completed custom quests visible and exposes knownTags', async () => {
+    const { app, clock } = makeTestApp();
+    const q = (await request(app).post('/api/quests').send({ title: '读书', durationMin: 25, subjectTag: '阅读' })).body;
+    const s = (await request(app).post(`/api/quests/${q.id}/start`)).body;
+    clock.current = new Date(new Date(s.endsAt).getTime() + 1000);
+    await request(app).post(`/api/sessions/${s.sessionId}/complete`);
+    const state = (await request(app).get('/api/state')).body;
+    expect(state.quests.find(x => x.id === q.id)).toMatchObject({ status: 'done', type: 'custom' });
+    expect(state.knownTags).toContain('阅读');
+  });
 });

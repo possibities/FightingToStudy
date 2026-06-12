@@ -130,3 +130,31 @@ small, .dim { color: var(--text-dim); font-size: 12px; }
 
 .toast-stack { position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 6px; z-index: 60; }
 .toast { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 9px 16px; box-shadow: 0 4px 14px rgba(0, 0, 0, .3); }
+
+/* —— 动效增强 —— */
+.quest-card { transition: transform .15s ease, box-shadow .15s ease; }
+.quest-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, .25); }
+.quest-actions { display: flex; align-items: center; gap: 8px; }
+.btn { transition: transform .1s ease, filter .15s ease; }
+.btn:hover:not(:disabled) { filter: brightness(1.12); transform: translateY(-1px); }
+
+.adventure { position: relative; overflow: hidden; }
+.adventure-stars { position: absolute; inset: 0; pointer-events: none; }
+.shooting-star { position: absolute; top: 12%; left: -12%; width: 90px; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, transparent, #fff); opacity: 0;
+  transform: rotate(16deg); animation: shoot 8s ease-in 2s infinite; pointer-events: none; }
+.shooting-star.delay { top: 30%; animation-delay: 7.5s; animation-duration: 11s; }
+[data-theme='day'] .shooting-star { display: none; }
+@keyframes shoot {
+  0% { transform: translateX(0) rotate(16deg); opacity: 0; }
+  2% { opacity: .9; }
+  9% { transform: translateX(130vw) rotate(16deg); opacity: 0; }
+  100% { transform: translateX(130vw) rotate(16deg); opacity: 0; }
+}
+.timer-aura { border-radius: 50%; animation: aura 3s ease-in-out infinite; }
+@keyframes aura {
+  0%, 100% { filter: drop-shadow(0 0 12px rgba(216, 179, 106, .22)); }
+  50% { filter: drop-shadow(0 0 32px rgba(216, 179, 106, .5)); }
+}
+.ring-rotor { transform-origin: 110px 110px; animation: rotor 24s linear infinite; }
+@keyframes rotor { to { transform: rotate(360deg); } }

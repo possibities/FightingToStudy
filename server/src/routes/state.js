@@ -17,9 +17,19 @@ export function createStateRouter({ db, now, rng }) {
       const player = db.prepare('SELECT * FROM player WHERE id=1').get();
       const resources = db.prepare('SELECT item_key, qty FROM inventory').all()
         .map(r => ({ key: r.item_key, name: MATERIAL_MAP[r.item_key].name, emoji: MATERIAL_MAP[r.item_key].emoji, qty: r.qty }));
+      const n = now();
+      const todayStartIso = new Date(n.getFullYear(), n.getMonth(), n.getDate()).toISOString();
       const quests = db.prepare(
-        "SELECT * FROM quests WHERE (type='daily' AND daily_date=?) OR (type='custom' AND status IN ('ready','active')) ORDER BY type DESC, id"
-      ).all(today).map(toQuestJson);
+        `SELECT DISTINCT q.* FROM quests q
+         LEFT JOIN sessions s ON s.quest_id=q.id AND s.status='completed'
+         WHERE (q.type='daily' AND q.daily_date=?)
+            OR (q.type='custom' AND q.status IN ('ready','active'))
+            OR (q.type='custom' AND q.status='done' AND s.completed_at>=?)
+         ORDER BY q.type DESC, q.id`
+      ).all(today, todayStartIso).map(toQuestJson);
+      const knownTags = db.prepare(
+        "SELECT subject_tag AS tag, COUNT(*) AS c FROM quests WHERE subject_tag IS NOT NULL GROUP BY subject_tag ORDER BY c DESC, tag LIMIT 8"
+      ).all().map(r => r.tag);
       const running = db.prepare(
         "SELECT s.*, q.title AS quest_title, q.type AS quest_type, q.duration_min AS qmin, q.subject_tag AS qtag FROM sessions s JOIN quests q ON q.id=s.quest_id WHERE s.status='running'"
       ).get();
@@ -37,7 +47,7 @@ export function createStateRouter({ db, now, rng }) {
           name: player.name, level: player.level, exp: player.exp, expToNext: expToNext(player.level),
           title: titleFor(player.level, TITLES), gold: player.gold, pityCounter: player.pity_counter,
         },
-        resources, quests,
+        resources, quests, knownTags,
         runningSession: running ? {
           id: running.id, questId: running.quest_id, questTitle: running.quest_title, questType: running.quest_type,
           durationMin: running.qmin, subjectTag: running.qtag, startedAt: running.started_at, endsAt: running.ends_at,

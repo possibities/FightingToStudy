@@ -18,7 +18,8 @@ export function createSessionsRouter({ db, now, rng }) {
       if (session.status !== 'running') throw new HttpError(409, '这次冒险已经结束了');
       db.transaction(() => {
         db.prepare("UPDATE sessions SET status='abandoned', completed_at=? WHERE id=?").run(now().toISOString(), session.id);
-        db.prepare("UPDATE quests SET status='failed' WHERE id=?").run(session.quest_id);
+        // 撤退的惩罚是本次无掉落;委托本身回到 ready,可重新出发
+        db.prepare("UPDATE quests SET status='ready' WHERE id=?").run(session.quest_id);
       })();
       res.json({ ok: true });
     } catch (e) { next(e); }

@@ -58,13 +58,26 @@ export default function Adventure() {
   return <Running session={session} buddy={buddy} onComplete={complete} onAbandon={abandon} error={error} busy={busy} />;
 }
 
+const ADV_STARS = [[6, 8], [14, 22], [24, 12], [34, 28], [44, 7], [55, 18], [64, 30], [72, 10], [81, 24], [90, 14], [12, 40], [88, 38], [50, 36], [70, 44]];
+
 function Running({ session, buddy, onComplete, onAbandon, error, busy }) {
   const { remainingMs, done } = useCountdown(session.endsAt);
   const totalMs = new Date(session.endsAt).getTime() - new Date(session.startedAt).getTime();
+  const pct = totalMs > 0 ? Math.min(100, Math.round(((totalMs - remainingMs) / totalMs) * 100)) : 0;
   return (
     <div className="adventure">
-      <p className="dim">— 委托:{session.questTitle} —</p>
-      <TimerRing remainingMs={remainingMs} totalMs={totalMs} label={done ? '时辰已到' : formatMs(remainingMs)} />
+      <div className="adventure-stars">
+        {ADV_STARS.map(([x, y], i) => (
+          <span key={i} className="star" style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${(i % 6) * 0.4}s` }} />
+        ))}
+        <span className="shooting-star" />
+        <span className="shooting-star delay" />
+      </div>
+      <p className="dim">— 委托:{session.questTitle}{session.subjectTag ? ` · ${session.subjectTag}` : ''} —</p>
+      <div className="timer-aura">
+        <TimerRing remainingMs={remainingMs} totalMs={totalMs} label={done ? '时辰已到' : formatMs(remainingMs)} />
+      </div>
+      <small className="dim">旅程 {done ? 100 : pct}%</small>
       <div className="adventure-buddy">{buddy}</div>
       <p className="dim">{done ? '冒险归来,清点战利品吧!' : '伙伴在篝火旁等你凯旋…'}</p>
       {error && <p className="error-line">{error}</p>}

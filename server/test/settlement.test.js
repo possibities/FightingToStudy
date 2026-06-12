@@ -101,15 +101,16 @@ describe('settlement', () => {
     expect(state.incubatingEgg).toMatchObject({ id: eggs[0].id, progress: 2, queueCount: 2 });
   });
 
-  it('abandon fails the quest with no rewards and frees the slot', async () => {
+  it('abandon pays nothing and the quest returns to ready', async () => {
     const { app, db } = makeTestApp();
     const { sessionId, quest } = await startQuest(app);
     expect((await request(app).post(`/api/sessions/${sessionId}/abandon`)).status).toBe(200);
     const state = (await request(app).get('/api/state')).body;
     expect(state.player.gold).toBe(0);
     expect(state.runningSession).toBeNull();
-    // 已失败的 custom 委托不再出现在 /api/state 列表,直接查库验证状态
-    expect(db.prepare('SELECT status FROM quests WHERE id=?').get(quest.id).status).toBe('failed');
+    // 撤退的惩罚是本次无掉落;委托本身回到 ready,可重新出发
+    expect(db.prepare('SELECT status FROM quests WHERE id=?').get(quest.id).status).toBe('ready');
+    expect((await request(app).post(`/api/quests/${quest.id}/start`)).status).toBe(200);
     expect((await request(app).post(`/api/sessions/${sessionId}/abandon`)).status).toBe(409);
     expect((await request(app).post(`/api/sessions/${sessionId}/complete`)).status).toBe(409);
   });

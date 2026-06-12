@@ -28,6 +28,7 @@ export default function CampScene() {
           <span key={i} className="star" style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${(i % 5) * 0.6}s` }} />
         ))}
         <span className="scene-sign"><span className="only-night">🌙</span><span className="only-day">☀️</span></span>
+        <span className="shooting-star" />
       </div>
       {SLOT_POS.map((pos, i) => {
         const b = bySlot[i];

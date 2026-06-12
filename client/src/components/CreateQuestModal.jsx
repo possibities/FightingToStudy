@@ -6,12 +6,14 @@ import { useToast } from './Toast.jsx';
 const TAG_SUGGESTIONS = ['英语', '算法', '阅读', '数学', '写作'];
 
 export default function CreateQuestModal({ onClose }) {
-  const { refresh } = useGame();
+  const { state, refresh } = useGame();
   const toast = useToast();
   const [title, setTitle] = useState('');
   const [duration, setDuration] = useState(25);
   const [tag, setTag] = useState('');
   const [busy, setBusy] = useState(false);
+  // 优先展示玩家自己用过的标签(按使用频率),没有历史时用默认建议
+  const tagOptions = state?.knownTags?.length ? state.knownTags : TAG_SUGGESTIONS;
 
   async function submit() {
     if (!title.trim()) { toast.show('给委托起个名字吧'); return; }
@@ -36,7 +38,7 @@ export default function CreateQuestModal({ onClose }) {
         <input type="range" min={5} max={120} step={5} value={duration} onChange={e => setDuration(Number(e.target.value))} />
         <input className="input" placeholder="学科标签(可选)" value={tag} onChange={e => setTag(e.target.value)} />
         <div className="tag-row">
-          {TAG_SUGGESTIONS.map(t => <button key={t} className="btn-ghost tag" onClick={() => setTag(t)}>{t}</button>)}
+          {tagOptions.map(t => <button key={t} className="btn-ghost tag" onClick={() => setTag(t)}>{t}</button>)}
         </div>
         <div className="modal-actions">
           <button className="btn-ghost" onClick={onClose}>取消</button>
