@@ -4,6 +4,7 @@ import { useGame } from '../state/GameStateContext.jsx';
 import { api } from '../api/client.js';
 import { useCountdown, formatMs } from '../hooks/useCountdown.js';
 import TimerRing from '../components/TimerRing.jsx';
+import RewardSequence from '../components/RewardSequence.jsx';
 
 export default function Adventure() {
   const { state, refresh } = useGame();
@@ -45,16 +46,7 @@ export default function Adventure() {
     navigate('/');
   }
 
-  if (events) {
-    // T18 替换为 <RewardSequence events={events} quest={finishedQuest} onDone={done} />
-    return (
-      <div className="adventure">
-        <h2>⚔️ 委托完成!{finishedQuest?.title}</h2>
-        {events.map((e, i) => <p key={i}>{JSON.stringify(e)}</p>)}
-        <button className="btn" onClick={done}>回营地</button>
-      </div>
-    );
-  }
+  if (events) return <RewardSequence events={events} quest={finishedQuest} onDone={done} />;
   if (!state) return <div className="splash">🔥 正在点亮篝火…</div>;
   if (!session) {
     navigate('/');
