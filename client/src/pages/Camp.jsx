@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../state/GameStateContext.jsx';
 import { useToast } from '../components/Toast.jsx';
-import { api } from '../api/client.js';
+import { api, createQuest } from '../api/client.js';
 import QuestCard from '../components/QuestCard.jsx';
 import CreateQuestModal from '../components/CreateQuestModal.jsx';
 import CampScene from '../components/CampScene.jsx';
+import { requestNotify } from '../utils/notify.js';
 
 export default function Camp() {
   const { state, refresh } = useGame();
@@ -27,6 +28,7 @@ export default function Camp() {
 
   async function startQuest(quest) {
     try {
+      requestNotify(); // 借出发这次点击手势申请通知权限,便于专注结束时提醒
       await api(`/quests/${quest.id}/start`, { method: 'POST' });
       await refresh();
       navigate('/adventure');
@@ -37,7 +39,7 @@ export default function Camp() {
 
   async function repeatQuest(quest) {
     try {
-      await api('/quests', { method: 'POST', body: { title: quest.title, durationMin: quest.durationMin, subjectTag: quest.subjectTag } });
+      await createQuest(quest);
       await refresh();
     } catch (e) {
       toast.show(e.message);
@@ -52,9 +54,9 @@ export default function Camp() {
     <div className="camp-split">
       <CampScene />
       <section className="quest-panel">
-        <h3 className="panel-title">📜 今日委托</h3>
+        <h3 className="panel-title deco-title">📜 今日委托</h3>
         {daily.map(q => <QuestCard key={q.id} quest={q} onStart={startQuest} />)}
-        <h3 className="panel-title">🗺️ 自由委托</h3>
+        <h3 className="panel-title deco-title">🗺️ 自由委托</h3>
         {custom.map(q => <QuestCard key={q.id} quest={q} onStart={startQuest} onRepeat={repeatQuest} />)}
         <button className="btn-ghost quest-add" onClick={() => setShowCreate(true)}>＋ 自建委托</button>
         {egg && (

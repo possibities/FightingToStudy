@@ -1,0 +1,14 @@
+{
+  "name": "星夜营地",
+  "short_name": "营地",
+  "description": "把专注变成一场冒险的学习伙伴",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f1626",
+  "theme_color": "#0f1626",
+  "icons": [
+    { "src": "/icon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any maskable" }
+  ]
+}

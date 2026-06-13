@@ -1,4 +1,5 @@
 import { useGame } from '../state/GameStateContext.jsx';
+import RollingNumber from './RollingNumber.jsx';
 
 export default function TopBar() {
   const { state } = useGame();
@@ -11,12 +12,12 @@ export default function TopBar() {
         <div>
           <b>{player.title} · Lv{player.level}</b>
           <div className="bar exp-bar"><div style={{ width: `${pct}%` }} /></div>
-          <small className="dim">EXP {player.exp}/{player.expToNext}</small>
+          <small className="dim">EXP <RollingNumber value={player.exp} />/{player.expToNext}</small>
         </div>
       </div>
       <div className="topbar-res">
-        <span>🪙 {player.gold}</span>
-        {resources.map(r => <span key={r.key} title={r.name}>{r.emoji} {r.qty}</span>)}
+        <span>🪙 <RollingNumber value={player.gold} /></span>
+        {resources.map(r => <span key={r.key} title={r.name}>{r.emoji} <RollingNumber value={r.qty} /></span>)}
       </div>
     </header>
   );

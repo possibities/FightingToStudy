@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { api } from '../api/client.js';
 import { useGame } from '../state/GameStateContext.jsx';
 import { useToast } from './Toast.jsx';
+import Modal from './Modal.jsx';
 
 const EFFECT_TEXT = {
   exp_pct: v => `EXP +${v}%/级`,
@@ -33,9 +34,8 @@ export default function BuildMenu({ slotIndex, building, onClose }) {
   }
 
   return (
-    <div className="modal-mask" onClick={onClose}>
-      <div className="modal card" onClick={e => e.stopPropagation()}>
-        <h3>{building ? '升级建筑' : '建造新建筑'}</h3>
+    <Modal onClose={onClose} labelledBy="build-menu-title">
+        <h3 id="build-menu-title">{building ? '升级建筑' : '建造新建筑'}</h3>
         {options.map(def => {
           const maxed = building && building.level >= 3;
           const targetLevel = building ? building.level + 1 : 1;
@@ -58,7 +58,6 @@ export default function BuildMenu({ slotIndex, building, onClose }) {
           );
         })}
         <button className="btn-ghost" onClick={onClose}>关闭</button>
-      </div>
-    </div>
+    </Modal>
   );
 }

@@ -3,8 +3,8 @@ import { render, screen, act, fireEvent } from '@testing-library/react';
 import RewardSequence from './RewardSequence.jsx';
 import { ToastProvider } from './Toast.jsx';
 
-vi.mock('../audio/sfx.js', () => ({ playSfx: vi.fn() }));
-vi.mock('../api/client.js', () => ({ api: vi.fn() }));
+vi.mock('../audio/sfx.js', () => ({ playSfx: vi.fn(), vibrate: vi.fn() }));
+vi.mock('../api/client.js', () => ({ createQuest: vi.fn() }));
 vi.mock('framer-motion', () => ({
   AnimatePresence: ({ children }) => children,
   motion: { div: ({ children, className }) => <div className={className}>{children}</div> },
@@ -28,12 +28,11 @@ describe('RewardSequence', () => {
       </ToastProvider>
     );
     expect(screen.queryByText(/经验 \+50/)).toBeNull();
-    act(() => { vi.advanceTimersByTime(950); });
+    act(() => { vi.advanceTimersByTime(700); }); // 经验揭晓
     expect(screen.getByText(/经验 \+50/)).toBeInTheDocument();
-    expect(screen.queryByText(/金币 \+25/)).toBeNull();
-    act(() => { vi.advanceTimersByTime(900); });
+    act(() => { vi.advanceTimersByTime(700); }); // 金币揭晓
     expect(screen.getByText(/金币 \+25/)).toBeInTheDocument();
-    act(() => { vi.advanceTimersByTime(900); });
+    act(() => { vi.advanceTimersByTime(700); }); // 稀有蛋以扣牌出现
     // 掉落以扣牌出现:翻开前看不到内容,也不能回营地
     expect(screen.queryByText(/稀有的蛋/)).toBeNull();
     expect(screen.queryByText('回营地')).toBeNull();

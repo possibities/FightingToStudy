@@ -4,8 +4,11 @@ import { useGame } from '../state/GameStateContext.jsx';
 import { useToast } from '../components/Toast.jsx';
 import { api } from '../api/client.js';
 import { useCountdown, formatMs } from '../hooks/useCountdown.js';
+import { useWakeLock } from '../hooks/useWakeLock.js';
+import { notify } from '../utils/notify.js';
 import TimerRing from '../components/TimerRing.jsx';
 import RewardSequence from '../components/RewardSequence.jsx';
+import Modal from '../components/Modal.jsx';
 
 export default function Adventure() {
   const { state, refresh } = useGame();
@@ -63,22 +66,20 @@ export default function Adventure() {
     <>
       <Running session={session} buddy={buddy} onComplete={complete} onAbandon={() => setShowRetreat(true)} error={error} busy={busy} />
       {showRetreat && (
-        <div className="modal-mask" onClick={() => setShowRetreat(false)}>
-          <div className="modal card retreat-modal" onClick={e => e.stopPropagation()}>
-            <div className="retreat-buddy">{buddy}</div>
-            <div className="speech">真的要走吗?战利品会留在森林里的…</div>
-            <h3>🏳️ 中途撤退</h3>
-            <ul className="retreat-warns dim">
-              <li>本次专注的所有掉落将泡汤</li>
-              <li>慌乱中可能弄丢 1~2 个材料</li>
-              <li>委托不会锁定,随时可以再出发</li>
-            </ul>
-            <div className="modal-actions">
-              <button className="btn-ghost btn-danger" onClick={abandon}>确认撤退</button>
-              <button className="btn" onClick={() => setShowRetreat(false)}>🔥 再坚持一下</button>
-            </div>
+        <Modal onClose={() => setShowRetreat(false)} className="retreat-modal" labelledBy="retreat-title">
+          <div className="retreat-buddy">{buddy}</div>
+          <div className="speech">真的要走吗?战利品会留在森林里的…</div>
+          <h3 id="retreat-title">🏳️ 中途撤退</h3>
+          <ul className="retreat-warns dim">
+            <li>本次专注的所有掉落将泡汤</li>
+            <li>慌乱中可能弄丢 1~2 个材料</li>
+            <li>委托不会锁定,随时可以再出发</li>
+          </ul>
+          <div className="modal-actions">
+            <button className="btn-ghost btn-danger" onClick={abandon}>确认撤退</button>
+            <button className="btn" onClick={() => setShowRetreat(false)}>🔥 再坚持一下</button>
           </div>
-        </div>
+        </Modal>
       )}
     </>
   );
@@ -102,12 +103,17 @@ function Running({ session, buddy, onComplete, onAbandon, error, busy }) {
   const totalMs = new Date(session.endsAt).getTime() - new Date(session.startedAt).getTime();
   const pct = totalMs > 0 ? Math.min(100, Math.round(((totalMs - remainingMs) / totalMs) * 100)) : 0;
   const [cheer, setCheer] = useState(() => CHEERS[Math.floor(Math.random() * CHEERS.length)]);
+  useWakeLock(!done); // 专注中保持屏幕常亮
   useEffect(() => {
     const t = setInterval(() => setCheer(CHEERS[Math.floor(Math.random() * CHEERS.length)]), 18000);
     return () => clearInterval(t);
   }, []);
+  // 计时结束且页面在后台时,弹通知召唤玩家回来结算
+  useEffect(() => {
+    if (done) notify('⚔️ 冒险完成!', `「${session.questTitle}」已凯旋,回营地清点战利品吧!`);
+  }, [done, session.questTitle]);
   return (
-    <div className="adventure">
+    <div className="adventure" style={{ '--dusk': done ? 1 : pct / 100 }}>
       <div className="adventure-stars">
         {ADV_STARS.map(([x, y], i) => (
           <span key={i} className="star" style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${(i % 6) * 0.4}s` }} />
@@ -122,7 +128,7 @@ function Running({ session, buddy, onComplete, onAbandon, error, busy }) {
       </div>
       <p className="dim">— 委托:{session.questTitle}{session.subjectTag ? ` · ${session.subjectTag}` : ''} —</p>
       <div className="timer-aura">
-        <TimerRing remainingMs={remainingMs} totalMs={totalMs} label={done ? '时辰已到' : formatMs(remainingMs)} />
+        <TimerRing remainingMs={remainingMs} totalMs={totalMs} done={done} label={done ? '时辰已到' : formatMs(remainingMs)} />
       </div>
       <small className="dim">旅程 {done ? 100 : pct}%</small>
       <div className="speech">{done ? '冒险归来,清点战利品吧!' : cheer}</div>

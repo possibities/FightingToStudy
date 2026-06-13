@@ -13,7 +13,7 @@ export function ToastProvider({ children }) {
   return (
     <ToastCtx.Provider value={{ show }}>
       {children}
-      <div className="toast-stack">
+      <div className="toast-stack" role="status" aria-live="polite" aria-atomic="false">
         {toasts.map(t => <div key={t.id} className="toast">{t.message}</div>)}
       </div>
     </ToastCtx.Provider>

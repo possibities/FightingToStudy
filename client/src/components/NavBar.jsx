@@ -1,11 +1,31 @@
-import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { useLayoutEffect, useRef, useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useTheme } from '../theme/ThemeContext.jsx';
+
+const LINKS = [
+  { to: '/', end: true, label: '🏕️ 营地' },
+  { to: '/collection', label: '📖 图鉴' },
+  { to: '/stats', label: '📊 统计' },
+];
 
 export default function NavBar() {
   const [open, setOpen] = useState(false);
   const { mode, setMode } = useTheme();
   const [sfx, setSfx] = useState(() => localStorage.getItem('sfx_enabled') !== 'off');
+  const navRef = useRef(null);
+  const [cursor, setCursor] = useState(null);
+  const location = useLocation();
+
+  // 测量当前激活标签的位置,游标用 CSS transition 滑过去(不依赖 framer)
+  useLayoutEffect(() => {
+    const measure = () => {
+      const a = navRef.current?.querySelector('a.active');
+      if (a) setCursor({ left: a.offsetLeft, top: a.offsetTop, width: a.offsetWidth, height: a.offsetHeight });
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [location.pathname]);
 
   function toggleSfx() {
     const next = !sfx;
@@ -14,10 +34,16 @@ export default function NavBar() {
   }
 
   return (
-    <nav className="navbar">
-      <NavLink to="/" end>🏕️ 营地</NavLink>
-      <NavLink to="/collection">📖 图鉴</NavLink>
-      <NavLink to="/stats">📊 统计</NavLink>
+    <nav className="navbar" ref={navRef}>
+      {cursor && (
+        <span className="nav-cursor" aria-hidden="true"
+          style={{ left: cursor.left, top: cursor.top, width: cursor.width, height: cursor.height }} />
+      )}
+      {LINKS.map(l => (
+        <NavLink key={l.to} to={l.to} end={l.end}>
+          <span className="nav-label">{l.label}</span>
+        </NavLink>
+      ))}
       <button className="nav-gear" onClick={() => setOpen(o => !o)} title="设置">⚙️</button>
       {open && (
         <div className="card settings-pop">

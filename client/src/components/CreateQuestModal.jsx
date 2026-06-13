@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { api } from '../api/client.js';
+import { createQuest } from '../api/client.js';
 import { useGame } from '../state/GameStateContext.jsx';
 import { useToast } from './Toast.jsx';
+import Modal from './Modal.jsx';
 
 const TAG_SUGGESTIONS = ['英语', '算法', '阅读', '数学', '写作'];
 
@@ -19,7 +20,7 @@ export default function CreateQuestModal({ onClose }) {
     if (!title.trim()) { toast.show('给委托起个名字吧'); return; }
     setBusy(true);
     try {
-      await api('/quests', { method: 'POST', body: { title: title.trim(), durationMin: duration, subjectTag: tag.trim() || null } });
+      await createQuest({ title: title.trim(), durationMin: duration, subjectTag: tag.trim() || null });
       await refresh();
       onClose();
     } catch (e) {
@@ -29,9 +30,8 @@ export default function CreateQuestModal({ onClose }) {
   }
 
   return (
-    <div className="modal-mask" onClick={onClose}>
-      <div className="modal card" onClick={e => e.stopPropagation()}>
-        <h3>新的委托</h3>
+    <Modal onClose={onClose} labelledBy="create-quest-title">
+        <h3 id="create-quest-title">新的委托</h3>
         <input className="input" maxLength={30} placeholder="比如:读《操作系统》第3章"
           value={title} onChange={e => setTitle(e.target.value)} autoFocus />
         <label className="dim">时长:{duration} 分钟</label>
@@ -44,7 +44,6 @@ export default function CreateQuestModal({ onClose }) {
           <button className="btn-ghost" onClick={onClose}>取消</button>
           <button className="btn" disabled={busy} onClick={submit}>创建</button>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }
