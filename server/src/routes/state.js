@@ -27,14 +27,14 @@ export function createStateRouter({ db, now, rng }) {
          WHERE ((q.type='daily' AND q.daily_date=?)
             OR (q.type='custom' AND q.status IN ('ready','active'))
             OR (q.type='custom' AND q.status='done' AND s.completed_at>=?))
-            AND q.id != ?
+            AND q.id != ? AND q.boss_id IS NULL
          ORDER BY q.type DESC, q.id`
       ).all(today, todayStartIso, freeQid).map(toQuestJson);
       const knownTags = db.prepare(
         "SELECT subject_tag AS tag, COUNT(*) AS c FROM quests WHERE subject_tag IS NOT NULL GROUP BY subject_tag ORDER BY c DESC, tag LIMIT 8"
       ).all().map(r => r.tag);
       const running = db.prepare(
-        "SELECT s.*, q.title AS quest_title, q.type AS quest_type, q.duration_min AS qmin, q.subject_tag AS qtag FROM sessions s JOIN quests q ON q.id=s.quest_id WHERE s.status='running'"
+        "SELECT s.*, q.title AS quest_title, q.type AS quest_type, q.duration_min AS qmin, q.subject_tag AS qtag, q.boss_id AS qboss FROM sessions s JOIN quests q ON q.id=s.quest_id WHERE s.status='running'"
       ).get();
       const egg = db.prepare("SELECT * FROM eggs WHERE status='incubating' ORDER BY obtained_at, id LIMIT 1").get();
       const queueCount = db.prepare("SELECT COUNT(*) AS c FROM eggs WHERE status='incubating'").get().c;
@@ -44,17 +44,25 @@ export function createStateRouter({ db, now, rng }) {
         .map(c => ({ id: c.id, key: c.species_key, name: SPECIES_MAP[c.species_key]?.name, emoji: SPECIES_MAP[c.species_key]?.emoji, rarity: c.rarity }));
       const collected = db.prepare('SELECT COUNT(DISTINCT species_key) AS c FROM creatures').get().c;
 
+      const bosses = db.prepare("SELECT * FROM bosses ORDER BY (status='active') DESC, id DESC").all().map(b => {
+        const todos = db.prepare('SELECT id, title, duration_min, subject_tag, status FROM quests WHERE boss_id=? ORDER BY id').all(b.id)
+          .map(t => ({ id: t.id, title: t.title, durationMin: t.duration_min, subjectTag: t.subject_tag, status: t.status }));
+        const totalMin = todos.reduce((s, t) => s + t.durationMin, 0);
+        const doneMin = todos.filter(t => t.status === 'done').reduce((s, t) => s + t.durationMin, 0);
+        return { id: b.id, title: b.title, status: b.status, titleAward: b.title_award, defeatedAt: b.defeated_at, todos, totalMin, doneMin };
+      });
+
       res.json({
         serverNow: now().toISOString(),
         player: {
           name: player.name, level: player.level, exp: player.exp, expToNext: expToNext(player.level),
           title: titleFor(player.level, TITLES), gold: player.gold, pityCounter: player.pity_counter,
         },
-        resources, quests, knownTags,
+        resources, quests, knownTags, bosses,
         runningSession: running ? {
           id: running.id, questId: running.quest_id, questTitle: running.quest_title, questType: running.quest_type,
           durationMin: running.qmin, subjectTag: running.qtag, startedAt: running.started_at, endsAt: running.ends_at,
-          free: running.kind === 'free',
+          free: running.kind === 'free', bossId: running.qboss,
         } : null,
         incubatingEgg: egg ? { id: egg.id, rarity: egg.rarity, progress: egg.progress, required: egg.required, queueCount } : null,
         buildings, buildingCatalog: BUILDINGS, creatures,

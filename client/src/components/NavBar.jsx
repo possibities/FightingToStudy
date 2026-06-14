@@ -6,6 +6,7 @@ import Icon from './Icon.jsx';
 
 const LINKS = [
   { to: '/', end: true, icon: 'camp', text: '营地' },
+  { to: '/boss', icon: 'skull', text: '讨伐' },
   { to: '/collection', icon: 'book', text: '图鉴' },
   { to: '/stats', icon: 'chart', text: '统计' },
 ];

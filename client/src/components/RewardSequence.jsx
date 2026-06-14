@@ -27,6 +27,7 @@ function eventView(e) {
     case 'egg': return { iconName: 'egg', text: `获得${RARITY_NAMES[e.rarity]}的蛋!${e.pity ? '(命运的眷顾)' : ''}`, cls: `rarity-${e.rarity}` };
     case 'egg_progress': return { iconName: 'hatch', text: `孵化进度 ${e.progress}/${e.required}`, cls: `rarity-${e.rarity}` };
     case 'hatch': return { icon: e.species.emoji, text: `孵化了「${e.species.name}」!${e.species.flavor}`, cls: `rarity-${e.species.rarity}` };
+    case 'boss_defeated': return { iconName: 'skull', text: `讨伐成功!击败「${e.boss}」 · 称号「${e.title}」`, cls: 'rarity-legendary' };
     default: return { icon: '❔', text: '???' };
   }
 }

@@ -42,7 +42,7 @@ export default function Adventure() {
       }
       setFinishedQuest({
         title: session.free ? '自由打野' : session.questTitle,
-        type: session.free ? 'free' : session.questType,
+        type: session.free ? 'free' : (session.bossId ? 'boss' : session.questType),
         durationMin: session.durationMin, subjectTag: session.subjectTag,
       });
       setEvents(data.events);

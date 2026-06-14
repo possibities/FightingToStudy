@@ -13,6 +13,7 @@ import Camp from './pages/Camp.jsx';
 const Adventure = lazy(() => import('./pages/Adventure.jsx'));
 const Collection = lazy(() => import('./pages/Collection.jsx'));
 const Stats = lazy(() => import('./pages/Stats.jsx'));
+const Boss = lazy(() => import('./pages/Boss.jsx'));
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
                 <Route path="/adventure" element={<Adventure />} />
                 <Route path="/" element={<Layout />}>
                   <Route index element={<Camp />} />
+                  <Route path="boss" element={<Boss />} />
                   <Route path="collection" element={<Collection />} />
                   <Route path="stats" element={<Stats />} />
                 </Route>

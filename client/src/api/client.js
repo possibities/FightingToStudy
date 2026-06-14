@@ -21,3 +21,11 @@ export const createQuest = ({ title, durationMin, subjectTag = null }) =>
 
 // 打野:开放式专注,随时开始/结束
 export const startFreeRoam = () => api('/sessions/free/start', { method: 'POST' });
+
+// 讨伐(Boss × 代办)
+export const startQuestById = (id) => api(`/quests/${id}/start`, { method: 'POST' });
+export const createBoss = (title) => api('/bosses', { method: 'POST', body: { title } });
+export const addBossTodo = (bossId, { title, durationMin, subjectTag = null }) =>
+  api(`/bosses/${bossId}/todos`, { method: 'POST', body: { title, durationMin, subjectTag } });
+export const deleteBossTodo = (bossId, todoId) => api(`/bosses/${bossId}/todos/${todoId}`, { method: 'DELETE' });
+export const deleteBoss = (bossId) => api(`/bosses/${bossId}`, { method: 'DELETE' });

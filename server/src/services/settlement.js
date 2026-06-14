@@ -2,7 +2,7 @@ import { HttpError } from '../utils/errors.js';
 import { calculateSettlement } from './rewards.js';
 import { aggregateBonuses } from './bonuses.js';
 import { FREE_CAP_MIN } from './freeRoam.js';
-import { BUILDING_MAP } from '../content/index.js';
+import { BUILDING_MAP, HATCH_REQUIRED } from '../content/index.js';
 
 export function settleSession({ db, sessionId, now, rng }) {
   const session = db.prepare('SELECT * FROM sessions WHERE id=?').get(sessionId);
@@ -56,6 +56,23 @@ export function settleSession({ db, sessionId, now, rng }) {
       db.prepare('INSERT INTO eggs (rarity, required, obtained_at) VALUES (?,?,?)')
         .run(deltas.eggDropped.rarity, deltas.eggDropped.required, nowIso);
     if (!isFree) db.prepare("UPDATE quests SET status='done' WHERE id=?").run(quest.id);
+
+    // 讨伐:该委托属于某 Boss 时,若其代办全部完成→击败,发大奖(金币+必得蛋+称号)
+    if (!isFree && quest.boss_id) {
+      const boss = db.prepare('SELECT * FROM bosses WHERE id=?').get(quest.boss_id);
+      const remaining = db.prepare("SELECT COUNT(*) AS c FROM quests WHERE boss_id=? AND status!='done'").get(quest.boss_id).c;
+      if (boss && boss.status === 'active' && remaining === 0) {
+        const totalMin = db.prepare('SELECT COALESCE(SUM(duration_min),0) AS m FROM quests WHERE boss_id=?').get(quest.boss_id).m;
+        const rarity = totalMin >= 360 ? 'legendary' : totalMin >= 120 ? 'epic' : 'rare';
+        const titleAward = `${boss.title} 讨伐者`;
+        db.prepare('UPDATE player SET gold=gold+? WHERE id=1').run(totalMin);
+        db.prepare('INSERT INTO eggs (rarity, required, obtained_at) VALUES (?,?,?)').run(rarity, HATCH_REQUIRED[rarity], nowIso);
+        db.prepare("UPDATE bosses SET status='defeated', title_award=?, defeated_at=? WHERE id=?").run(titleAward, nowIso, boss.id);
+        events.push({ type: 'boss_defeated', boss: boss.title, title: titleAward });
+        events.push({ type: 'gold', amount: totalMin });
+        events.push({ type: 'egg', rarity, pity: false });
+      }
+    }
     const payload = isFree ? { events, free: true, minutes: durationMin } : { events };
     db.prepare("UPDATE sessions SET status='completed', completed_at=?, settlement_json=?, minutes=? WHERE id=?")
       .run(nowIso, JSON.stringify(payload), durationMin, sessionId);

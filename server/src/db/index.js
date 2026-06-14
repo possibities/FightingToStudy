@@ -13,11 +13,13 @@ export function createDb(filePath = ':memory:') {
   return db;
 }
 
-// 轻量迁移:为打野(自由专注)增列。ALTER ADD COLUMN 安全、不重建表、保留存档。
+// 轻量迁移:为打野(自由专注)与讨伐(Boss)增列。ALTER ADD COLUMN 安全、不重建表、保留存档。
 function migrate(db) {
   const cols = db.prepare('PRAGMA table_info(sessions)').all().map(c => c.name);
   if (!cols.includes('kind')) db.exec("ALTER TABLE sessions ADD COLUMN kind TEXT NOT NULL DEFAULT 'quest'");
   if (!cols.includes('minutes')) db.exec('ALTER TABLE sessions ADD COLUMN minutes INTEGER');
+  const qcols = db.prepare('PRAGMA table_info(quests)').all().map(c => c.name);
+  if (!qcols.includes('boss_id')) db.exec('ALTER TABLE quests ADD COLUMN boss_id INTEGER');
 }
 
 export const DATA_DIR = path.resolve(__dirname, '../../../data');
