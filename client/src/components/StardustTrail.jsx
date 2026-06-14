@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { reduceMotion } from '../utils/motion.js';
 
 const GLYPHS = ['✦', '✧', '·', '✨'];
 
@@ -6,8 +7,8 @@ const GLYPHS = ['✦', '✧', '·', '✨'];
 export default function StardustTrail() {
   const boxRef = useRef(null);
   useEffect(() => {
-    // 尊重系统「减少动态效果」偏好:不挂监听、不生成粒子
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    // 尊重「动效」设置:关闭时不挂监听、不生成粒子
+    if (reduceMotion()) return;
     const box = boxRef.current;
     let last = 0;
     function onMove(e) {

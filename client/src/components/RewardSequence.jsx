@@ -4,11 +4,11 @@ import { createQuest } from '../api/client.js';
 import { useToast } from './Toast.jsx';
 import { playSfx, vibrate } from '../audio/sfx.js';
 import { RARITY_NAMES } from '../utils/rarity.js';
+import { reduceMotion } from '../utils/motion.js';
 import Icon from './Icon.jsx';
 
 const FLIP_TYPES = ['egg', 'hatch'];
 const RARE_TIERS = ['rare', 'epic', 'legendary'];
-const REDUCE = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
 const rarityOf = e => e.rarity ?? e.species?.rarity ?? null;
 
@@ -123,7 +123,7 @@ export default function RewardSequence({ events, quest, onDone }) {
     playSfx('flip');
     if (rarity === 'legendary') {
       playSfx('legendary'); vibrate([40, 60, 140]);
-      if (!REDUCE()) setStage(true);
+      if (!reduceMotion()) setStage(true);
     } else if (rarity === 'epic') {
       playSfx('epic'); vibrate([30, 40, 60]); flashPulse('epic');
     } else if (rarity === 'rare') {

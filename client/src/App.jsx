@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { GameStateProvider } from './state/GameStateContext.jsx';
 import { ThemeProvider } from './theme/ThemeContext.jsx';
+import { MotionProvider } from './theme/MotionContext.jsx';
 import { ToastProvider } from './components/Toast.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import StardustTrail from './components/StardustTrail.jsx';
@@ -17,6 +18,7 @@ export default function App() {
   return (
     <ErrorBoundary>
     <ThemeProvider>
+      <MotionProvider>
       <ToastProvider>
         <GameStateProvider>
           <StardustTrail />
@@ -34,6 +36,7 @@ export default function App() {
           </BrowserRouter>
         </GameStateProvider>
       </ToastProvider>
+      </MotionProvider>
     </ThemeProvider>
     </ErrorBoundary>
   );

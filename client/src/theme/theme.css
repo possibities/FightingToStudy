@@ -364,9 +364,10 @@ small, .dim { color: var(--text-dim); font-size: 12px; }
 ::-webkit-scrollbar-thumb { background: var(--gold); border: 3px solid var(--bg); }
 ::-webkit-scrollbar-track { background: transparent; }
 
-/* ============ 减少动态效果兜底 ============ */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
-  .plx-1, .plx-2, .plx-3, .plx-4 { transform: none !important; }
-  .star, .firefly, .cloud, .shooting-star, .stardust-box, .legend-bars { display: none !important; }
+/* ============ 减少动态效果:由 MotionProvider 按「动效」设置切换 <html>.reduce-motion(跟随系统/开/关) ============ */
+:root.reduce-motion *, :root.reduce-motion *::before, :root.reduce-motion *::after {
+  animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important;
 }
+:root.reduce-motion .plx-1, :root.reduce-motion .plx-2, :root.reduce-motion .plx-3, :root.reduce-motion .plx-4 { transform: none !important; }
+:root.reduce-motion .star, :root.reduce-motion .firefly, :root.reduce-motion .cloud,
+:root.reduce-motion .shooting-star, :root.reduce-motion .stardust-box, :root.reduce-motion .legend-bars { display: none !important; }

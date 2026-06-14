@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
+import { reduceMotion } from '../utils/motion.js';
 
-const REDUCE = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
 
 // 数字滚动:首帧直接落终值(不从 0 滚),之后只对 delta 用 rAF 补间,直写 DOM。
@@ -14,7 +14,7 @@ export default function RollingNumber({ value, className = '' }) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (!inited.current || REDUCE()) {
+    if (!inited.current || reduceMotion()) {
       el.textContent = Math.round(value);
       fromRef.current = value;
       inited.current = true;

@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useTheme } from '../theme/ThemeContext.jsx';
+import { useMotion } from '../theme/MotionContext.jsx';
 import Icon from './Icon.jsx';
 
 const LINKS = [
@@ -12,6 +13,7 @@ const LINKS = [
 export default function NavBar() {
   const [open, setOpen] = useState(false);
   const { mode, setMode } = useTheme();
+  const { mode: motionMode, setMode: setMotionMode } = useMotion();
   const [sfx, setSfx] = useState(() => localStorage.getItem('sfx_enabled') !== 'off');
   const navRef = useRef(null);
   const [cursor, setCursor] = useState(null);
@@ -57,6 +59,13 @@ export default function NavBar() {
           </label>
           <label>音效
             <button className="btn-ghost" onClick={toggleSfx}>{sfx ? '开' : '关'}</button>
+          </label>
+          <label>动效
+            <select value={motionMode} onChange={e => setMotionMode(e.target.value)}>
+              <option value="auto">跟随系统</option>
+              <option value="on">开</option>
+              <option value="off">关</option>
+            </select>
           </label>
         </div>
       )}
