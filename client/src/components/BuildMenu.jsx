@@ -3,6 +3,7 @@ import { api } from '../api/client.js';
 import { useGame } from '../state/GameStateContext.jsx';
 import { useToast } from './Toast.jsx';
 import Modal from './Modal.jsx';
+import Icon from './Icon.jsx';
 
 const EFFECT_TEXT = {
   exp_pct: v => `EXP +${v}%/级`,
@@ -44,7 +45,7 @@ export default function BuildMenu({ slotIndex, building, onClose }) {
           return (
             <div key={def.key} className="card build-row">
               <div>
-                <b>{def.emoji} {def.name}{building ? ` Lv${building.level}${maxed ? '' : ` → Lv${targetLevel}`}` : ''}</b>
+                <b><Icon name={def.key} size={18} /> {def.name}{building ? ` Lv${building.level}${maxed ? '' : ` → Lv${targetLevel}`}` : ''}</b>
                 <div className="dim">{def.desc}</div>
                 {def.effect && <div className="dim">效果:{EFFECT_TEXT[def.effect.type](def.effect.value)}</div>}
                 {!maxed && (

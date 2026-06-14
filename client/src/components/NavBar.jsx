@@ -1,11 +1,12 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useTheme } from '../theme/ThemeContext.jsx';
+import Icon from './Icon.jsx';
 
 const LINKS = [
-  { to: '/', end: true, label: '🏕️ 营地' },
-  { to: '/collection', label: '📖 图鉴' },
-  { to: '/stats', label: '📊 统计' },
+  { to: '/', end: true, icon: 'camp', text: '营地' },
+  { to: '/collection', icon: 'book', text: '图鉴' },
+  { to: '/stats', icon: 'chart', text: '统计' },
 ];
 
 export default function NavBar() {
@@ -41,10 +42,10 @@ export default function NavBar() {
       )}
       {LINKS.map(l => (
         <NavLink key={l.to} to={l.to} end={l.end}>
-          <span className="nav-label">{l.label}</span>
+          <span className="nav-label"><Icon name={l.icon} />{l.text}</span>
         </NavLink>
       ))}
-      <button className="nav-gear" onClick={() => setOpen(o => !o)} title="设置">⚙️</button>
+      <button className="nav-gear" onClick={() => setOpen(o => !o)} title="设置"><Icon name="gear" /></button>
       {open && (
         <div className="card settings-pop">
           <label>主题
@@ -55,7 +56,7 @@ export default function NavBar() {
             </select>
           </label>
           <label>音效
-            <button className="btn-ghost" onClick={toggleSfx}>{sfx ? '开 🔔' : '关 🔕'}</button>
+            <button className="btn-ghost" onClick={toggleSfx}>{sfx ? '开' : '关'}</button>
           </label>
         </div>
       )}

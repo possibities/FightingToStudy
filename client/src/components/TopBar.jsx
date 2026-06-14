@@ -1,5 +1,6 @@
 import { useGame } from '../state/GameStateContext.jsx';
 import RollingNumber from './RollingNumber.jsx';
+import Icon from './Icon.jsx';
 
 export default function TopBar() {
   const { state } = useGame();
@@ -8,16 +9,18 @@ export default function TopBar() {
   return (
     <header className="topbar card">
       <div className="topbar-id">
-        <span className="topbar-avatar">🧙</span>
+        <span className="topbar-avatar"><Icon name="avatar" /></span>
         <div>
           <b>{player.title} · Lv{player.level}</b>
           <div className="bar exp-bar"><div style={{ width: `${pct}%` }} /></div>
-          <small className="dim">EXP <RollingNumber value={player.exp} />/{player.expToNext}</small>
+          <small className="dim">EXP <RollingNumber value={player.exp} className="num" />/<span className="num">{player.expToNext}</span></small>
         </div>
       </div>
       <div className="topbar-res">
-        <span>🪙 <RollingNumber value={player.gold} /></span>
-        {resources.map(r => <span key={r.key} title={r.name}>{r.emoji} <RollingNumber value={r.qty} /></span>)}
+        <span className="res-chip"><Icon name="coin" /><RollingNumber value={player.gold} className="num" /></span>
+        {resources.map(r => (
+          <span className="res-chip" key={r.key} title={r.name}><Icon name={r.key} /><RollingNumber value={r.qty} className="num" /></span>
+        ))}
       </div>
     </header>
   );

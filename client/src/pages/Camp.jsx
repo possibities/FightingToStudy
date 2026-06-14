@@ -6,6 +6,7 @@ import { api, createQuest } from '../api/client.js';
 import QuestCard from '../components/QuestCard.jsx';
 import CreateQuestModal from '../components/CreateQuestModal.jsx';
 import CampScene from '../components/CampScene.jsx';
+import Icon from '../components/Icon.jsx';
 import { requestNotify } from '../utils/notify.js';
 
 export default function Camp() {
@@ -54,16 +55,16 @@ export default function Camp() {
     <div className="camp-split">
       <CampScene />
       <section className="quest-panel">
-        <h3 className="panel-title deco-title">📜 今日委托</h3>
+        <h3 className="panel-title deco-title"><span className="sec-idx">01</span>今日委托</h3>
         {daily.map(q => <QuestCard key={q.id} quest={q} onStart={startQuest} />)}
-        <h3 className="panel-title deco-title">🗺️ 自由委托</h3>
+        <h3 className="panel-title deco-title"><span className="sec-idx">02</span>自由委托</h3>
         {custom.map(q => <QuestCard key={q.id} quest={q} onStart={startQuest} onRepeat={repeatQuest} />)}
-        <button className="btn-ghost quest-add" onClick={() => setShowCreate(true)}>＋ 自建委托</button>
+        <button className="btn-ghost quest-add" onClick={() => setShowCreate(true)}><Icon name="plus" size={15} /> 自建委托</button>
         {egg && (
           <div className="card egg-card">
-            <span>🥚 <b className={`rarity-${egg.rarity}`}>孵化中</b>{egg.queueCount > 1 ? <small className="dim"> · 队列 {egg.queueCount}</small> : null}</span>
+            <span><Icon name="egg" size={16} /> <b className={`rarity-${egg.rarity}`}>孵化中</b>{egg.queueCount > 1 ? <small className="dim"> · 队列 <span className="num">{egg.queueCount}</span></small> : null}</span>
             <div className="bar"><div style={{ width: `${(egg.progress / egg.required) * 100}%` }} /></div>
-            <small className="dim">再专注 {egg.required - egg.progress} 次就孵出来了!</small>
+            <small className="dim">再专注 <span className="num">{egg.required - egg.progress}</span> 次就孵出来了!</small>
           </div>
         )}
         {showCreate && <CreateQuestModal onClose={() => setShowCreate(false)} />}

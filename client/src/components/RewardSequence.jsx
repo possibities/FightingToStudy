@@ -4,6 +4,7 @@ import { createQuest } from '../api/client.js';
 import { useToast } from './Toast.jsx';
 import { playSfx, vibrate } from '../audio/sfx.js';
 import { RARITY_NAMES } from '../utils/rarity.js';
+import Icon from './Icon.jsx';
 
 const FLIP_TYPES = ['egg', 'hatch'];
 const RARE_TIERS = ['rare', 'epic', 'legendary'];
@@ -19,15 +20,20 @@ function stepFor(event, idx) {
 
 function eventView(e) {
   switch (e.type) {
-    case 'exp': return { icon: '✨', text: `经验 +${e.amount}` };
-    case 'gold': return { icon: '🪙', text: `金币 +${e.amount}` };
-    case 'levelup': return { icon: '🎺', text: `升级!Lv${e.level}${e.title ? ` · 获得称号「${e.title}」` : ''}`, cls: 'rarity-legendary' };
+    case 'exp': return { iconName: 'spark', text: `经验 +${e.amount}` };
+    case 'gold': return { iconName: 'coin', text: `金币 +${e.amount}` };
+    case 'levelup': return { iconName: 'trophy', text: `升级!Lv${e.level}${e.title ? ` · 获得称号「${e.title}」` : ''}`, cls: 'rarity-legendary' };
     case 'material': return { icon: e.emoji, text: `${e.name} ×${e.qty}` };
-    case 'egg': return { icon: '🥚', text: `获得${RARITY_NAMES[e.rarity]}的蛋!${e.pity ? '(命运的眷顾)' : ''}`, cls: `rarity-${e.rarity}` };
-    case 'egg_progress': return { icon: '🐣', text: `孵化进度 ${e.progress}/${e.required}`, cls: `rarity-${e.rarity}` };
+    case 'egg': return { iconName: 'egg', text: `获得${RARITY_NAMES[e.rarity]}的蛋!${e.pity ? '(命运的眷顾)' : ''}`, cls: `rarity-${e.rarity}` };
+    case 'egg_progress': return { iconName: 'hatch', text: `孵化进度 ${e.progress}/${e.required}`, cls: `rarity-${e.rarity}` };
     case 'hatch': return { icon: e.species.emoji, text: `孵化了「${e.species.name}」!${e.species.flavor}`, cls: `rarity-${e.species.rarity}` };
     default: return { icon: '❔', text: '???' };
   }
+}
+
+// 奖励行图标:程序化事件用 SVG,材料/生物等内容保留 emoji
+function RewardIcon({ view }) {
+  return <span className="reward-icon">{view.iconName ? <Icon name={view.iconName} /> : view.icon}</span>;
 }
 
 // 粒子爆裂,颗数随稀有度递增
@@ -40,7 +46,7 @@ function Burst({ count = 12 }) {
   return (
     <span className="burst">
       {parts.map((p, i) => (
-        <span key={i} className="burst-p" style={{ '--dx': `${p.dx}px`, '--dy': `${p.dy}px`, animationDelay: `${p.delay}s` }}>✨</span>
+        <span key={i} className="burst-p" style={{ '--dx': `${p.dx}px`, '--dy': `${p.dy}px`, animationDelay: `${p.delay}s` }} />
       ))}
     </span>
   );
@@ -75,7 +81,7 @@ function FlipCard({ view, rarity, type, onFlip }) {
   return (
     <div className={`reward-item flip-swap ${view.cls || ''}${type === 'hatch' ? ' hatch-reveal' : ''}`} style={{ position: 'relative' }}>
       {type === 'hatch' && <span className="hatch-ring" />}
-      <span className="reward-icon">{view.icon}</span>{view.text}
+      <RewardIcon view={view} />{view.text}
       {tier && <Burst count={burstCount} />}
     </div>
   );
@@ -149,7 +155,7 @@ export default function RewardSequence({ events, quest, onDone }) {
               <motion.div key={i} initial={{ opacity: 0, y: 16, scale: 0.92 }} animate={{ opacity: 1, y: 0, scale: 1 }}>
                 {FLIP_TYPES.includes(e.type)
                   ? <FlipCard view={v} rarity={rarityOf(e)} type={e.type} onFlip={handleFlip} />
-                  : <div className={`reward-item ${v.cls || ''}`}><span className="reward-icon">{v.icon}</span>{v.text}</div>}
+                  : <div className={`reward-item ${v.cls || ''}`}><RewardIcon view={v} />{v.text}</div>}
               </motion.div>
             );
           })}

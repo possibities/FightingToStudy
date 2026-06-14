@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useGame } from '../state/GameStateContext.jsx';
 import BuildMenu from './BuildMenu.jsx';
+import Icon from './Icon.jsx';
 
 const SLOT_POS = [
   { left: '44%', top: '58%' },  // 0 篝火(固定)
@@ -68,7 +69,7 @@ export default function CampScene() {
         ))}
         <span className="cloud cloud-a" />
         <span className="cloud cloud-b" />
-        <span className="scene-sign"><span className="only-night">🌙</span><span className="only-day">☀️</span></span>
+        <span className="scene-sign"><span className="only-night"><Icon name="moon" /></span><span className="only-day"><Icon name="sun" /></span></span>
         <span className="shooting-star" />
       </div>
       <div className="hill hill-far plx-2" />
@@ -88,10 +89,10 @@ export default function CampScene() {
             title={b ? catalog[b.key].name : '空地,点击建造'}>
             {b ? (
               <>
-                <span className="slot-emoji">{catalog[b.key].emoji}</span>
+                <span className="slot-ico"><Icon name={b.key} /></span>
                 <span className="slot-label">{catalog[b.key].name} Lv{b.level}</span>
               </>
-            ) : <span className="slot-plus">＋</span>}
+            ) : <span className="slot-plus"><Icon name="plus" /></span>}
           </button>
         );
       })}

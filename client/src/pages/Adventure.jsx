@@ -9,6 +9,7 @@ import { notify } from '../utils/notify.js';
 import TimerRing from '../components/TimerRing.jsx';
 import RewardSequence from '../components/RewardSequence.jsx';
 import Modal from '../components/Modal.jsx';
+import Icon from '../components/Icon.jsx';
 
 export default function Adventure() {
   const { state, refresh } = useGame();
@@ -126,7 +127,7 @@ function Running({ session, buddy, onComplete, onAbandon, error, busy }) {
         <div className="hill hill-far adv-hill-far" />
         <div className="hill hill-mid adv-hill-mid" />
       </div>
-      <p className="dim">— 委托:{session.questTitle}{session.subjectTag ? ` · ${session.subjectTag}` : ''} —</p>
+      <p className="adventure-quest">委托 · {session.questTitle}{session.subjectTag ? ` · ${session.subjectTag}` : ''}</p>
       <div className="timer-aura">
         <TimerRing remainingMs={remainingMs} totalMs={totalMs} done={done} label={done ? '时辰已到' : formatMs(remainingMs)} />
       </div>
@@ -135,8 +136,8 @@ function Running({ session, buddy, onComplete, onAbandon, error, busy }) {
       <div className="adventure-buddy">{buddy}</div>
       {error && <p className="error-line">{error}</p>}
       {done || error
-        ? <button className="btn btn-big" disabled={busy} onClick={onComplete}>{error ? '重试结算' : '🎺 凯旋归来'}</button>
-        : <button className="btn-ghost retreat" onClick={onAbandon}>中途撤退(本次无掉落)</button>}
+        ? <button className="btn btn-big" disabled={busy} onClick={onComplete}>{error ? '重试结算' : <><Icon name="trophy" size={18} /> 凯旋归来</>}</button>
+        : <button className="btn-ghost retreat" onClick={onAbandon}><Icon name="flag" size={14} /> 中途撤退(本次无掉落)</button>}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
+import Icon from '../components/Icon.jsx';
 
 export default function Stats() {
   const [data, setData] = useState(null);
@@ -14,7 +15,7 @@ export default function Stats() {
   if (error) return <p className="dim">📡 {error}</p>;
   if (!data) return (
     <div>
-      <h2 className="deco-title">📊 冒险统计</h2>
+      <h2 className="deco-title"><Icon name="chart" size={20} /> 冒险统计</h2>
       <div className="stat-cards">{Array.from({ length: 5 }, (_, i) => <div key={i} className="skel skel-stat" />)}</div>
       <div className="skel skel-block" />
     </div>
@@ -23,13 +24,13 @@ export default function Stats() {
   const maxSubject = Math.max(1, ...data.subjects.map(s => s.minutes));
   return (
     <div>
-      <h2 className="deco-title">📊 冒险统计</h2>
+      <h2 className="deco-title"><Icon name="chart" size={20} /> 冒险统计</h2>
       <div className="stat-cards">
-        <div className="card stat-card"><span className="stat-ico">⏳</span><b>{Math.floor(data.totalMinutes / 60)}h {data.totalMinutes % 60}m</b><small className="dim">总专注</small></div>
-        <div className="card stat-card"><span className="stat-ico">⚔️</span><b>{data.totalSessions}</b><small className="dim">完成委托</small></div>
-        <div className="card stat-card"><span className="stat-ico">🏅</span><b>Lv{data.level}</b><small className="dim">{data.title}</small></div>
-        <div className="card stat-card"><span className="stat-ico">📖</span><b>{data.collection.collected}/{data.collection.total}</b><small className="dim">图鉴收集</small></div>
-        <div className="card stat-card"><span className="stat-ico">🏕️</span><b>{data.buildingCount}</b><small className="dim">营地建筑</small></div>
+        <div className="card stat-card"><span className="stat-ico"><Icon name="hourglass" /></span><b className="num">{Math.floor(data.totalMinutes / 60)}h {data.totalMinutes % 60}m</b><small className="dim">总专注</small></div>
+        <div className="card stat-card"><span className="stat-ico"><Icon name="sword" /></span><b className="num">{data.totalSessions}</b><small className="dim">完成委托</small></div>
+        <div className="card stat-card"><span className="stat-ico"><Icon name="medal" /></span><b className="num">Lv{data.level}</b><small className="dim">{data.title}</small></div>
+        <div className="card stat-card"><span className="stat-ico"><Icon name="book" /></span><b className="num">{data.collection.collected}/{data.collection.total}</b><small className="dim">图鉴收集</small></div>
+        <div className="card stat-card"><span className="stat-ico"><Icon name="camp" /></span><b className="num">{data.buildingCount}</b><small className="dim">营地建筑</small></div>
       </div>
       <div className="card">
         <h3>本周专注(分钟)</h3>

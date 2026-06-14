@@ -9,16 +9,16 @@ export default function TimerRing({ remainingMs, totalMs, label, done = false })
         <defs>
           <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="var(--gold)" />
-            <stop offset="100%" stopColor="var(--purple)" />
+            <stop offset="100%" stopColor="var(--gold-hi)" />
           </linearGradient>
         </defs>
         <circle cx="110" cy="110" r={R + 14} fill="none" stroke="var(--gold)" strokeOpacity="0.22"
           strokeWidth="1.5" strokeDasharray="4 12" className={`ring-rotor${done ? ' ring-rotor-charged' : ''}`} />
-        <circle cx="110" cy="110" r={R} fill="none" stroke="var(--card-2)" strokeWidth="8" />
-        <circle cx="110" cy="110" r={R} fill="none" stroke="url(#ringGrad)" strokeWidth="8"
-          strokeLinecap="round" strokeDasharray={C} strokeDashoffset={C * (1 - frac)}
+        <circle cx="110" cy="110" r={R} fill="none" stroke="var(--card-2)" strokeWidth="9" />
+        <circle cx="110" cy="110" r={R} fill="none" stroke="url(#ringGrad)" strokeWidth="9"
+          strokeLinecap="butt" strokeDasharray={C} strokeDashoffset={C * (1 - frac)}
           transform="rotate(-90 110 110)"
-          style={{ transition: 'stroke-dashoffset .3s linear', filter: 'drop-shadow(0 0 10px rgba(216,179,106,.45))' }} />
+          style={{ transition: 'stroke-dashoffset .3s linear' }} />
       </svg>
       <div className="timer-label">{label}</div>
     </div>
