@@ -1,10 +1,26 @@
 import { Router } from 'express';
 import { HttpError } from '../utils/errors.js';
 import { settleSession } from '../services/settlement.js';
+import { ensureFreeQuest } from '../services/freeRoam.js';
 import { MATERIAL_MAP } from '../content/index.js';
 
 export function createSessionsRouter({ db, now, rng }) {
   const router = Router();
+
+  // 打野:开放式专注,无时长承诺,结算按实际耗时(见 settlement)
+  router.post('/free/start', (req, res, next) => {
+    try {
+      if (db.prepare("SELECT id FROM sessions WHERE status='running'").get())
+        throw new HttpError(409, '已有进行中的冒险');
+      const questId = ensureFreeQuest(db, now);
+      const startedAt = now();
+      const endsAt = new Date(startedAt.getTime() + 12 * 3600_000); // 哨兵:满足 NOT NULL,打野不看它
+      const info = db.prepare(
+        "INSERT INTO sessions (quest_id, started_at, ends_at, kind) VALUES (?,?,?, 'free')"
+      ).run(questId, startedAt.toISOString(), endsAt.toISOString());
+      res.json({ sessionId: Number(info.lastInsertRowid), startedAt: startedAt.toISOString() });
+    } catch (e) { next(e); }
+  });
 
   router.post('/:id/complete', (req, res, next) => {
     try {

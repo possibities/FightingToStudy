@@ -34,7 +34,17 @@ export default function Adventure() {
     setError(null);
     try {
       const data = await api(`/sessions/${session.id}/complete`, { method: 'POST' });
-      setFinishedQuest({ title: session.questTitle, type: session.questType, durationMin: session.durationMin, subjectTag: session.subjectTag });
+      if (data.free && data.minutes === 0) { // 打野不足 1 分钟,空手而归
+        toast.show('打野不足 1 分钟,什么都没带回来');
+        await refresh();
+        navigate('/');
+        return;
+      }
+      setFinishedQuest({
+        title: session.free ? '自由打野' : session.questTitle,
+        type: session.free ? 'free' : session.questType,
+        durationMin: session.durationMin, subjectTag: session.subjectTag,
+      });
       setEvents(data.events);
     } catch (e) {
       setError(e.message);
@@ -87,6 +97,7 @@ export default function Adventure() {
 }
 
 const ADV_STARS = [[6, 8], [14, 22], [24, 12], [34, 28], [44, 7], [55, 18], [64, 30], [72, 10], [81, 24], [90, 14], [12, 40], [88, 38], [50, 36], [70, 44]];
+const FREE_CAP_MIN = 120; // 打野结算封顶(与后端一致)
 
 const CHEERS = [
   '你专注的样子在发光 ✨',
@@ -100,21 +111,36 @@ const CHEERS = [
 ];
 
 function Running({ session, buddy, onComplete, onAbandon, error, busy }) {
-  const { remainingMs, done } = useCountdown(session.endsAt);
-  const totalMs = new Date(session.endsAt).getTime() - new Date(session.startedAt).getTime();
+  const free = !!session.free;
+  const { remainingMs, done: cdDone } = useCountdown(session.endsAt);
+  const [elapsedMs, setElapsedMs] = useState(() => Math.max(0, Date.now() - new Date(session.startedAt).getTime()));
+  useEffect(() => {
+    if (!free) return; // 打野正向累加;委托用倒计时
+    const t = setInterval(() => setElapsedMs(Math.max(0, Date.now() - new Date(session.startedAt).getTime())), 250);
+    return () => clearInterval(t);
+  }, [free, session.startedAt]);
+
+  const capMs = FREE_CAP_MIN * 60000;
+  const done = free ? false : cdDone;
+  const totalMs = free ? capMs : new Date(session.endsAt).getTime() - new Date(session.startedAt).getTime();
+  const ringRemain = free ? Math.min(elapsedMs, capMs) : remainingMs; // 打野:环随专注时长填充
   const pct = totalMs > 0 ? Math.min(100, Math.round(((totalMs - remainingMs) / totalMs) * 100)) : 0;
+  const dusk = free ? Math.min(1, elapsedMs / capMs) : (done ? 1 : pct / 100);
+  const elapsedMin = Math.floor(elapsedMs / 60000);
+
   const [cheer, setCheer] = useState(() => CHEERS[Math.floor(Math.random() * CHEERS.length)]);
-  useWakeLock(!done); // 专注中保持屏幕常亮
+  useWakeLock(free || !done); // 专注中保持屏幕常亮
   useEffect(() => {
     const t = setInterval(() => setCheer(CHEERS[Math.floor(Math.random() * CHEERS.length)]), 18000);
     return () => clearInterval(t);
   }, []);
-  // 计时结束且页面在后台时,弹通知召唤玩家回来结算
+  // 委托计时结束且页面在后台时,弹通知召唤玩家回来结算
   useEffect(() => {
-    if (done) notify('⚔️ 冒险完成!', `「${session.questTitle}」已凯旋,回营地清点战利品吧!`);
-  }, [done, session.questTitle]);
+    if (!free && done) notify('⚔️ 冒险完成!', `「${session.questTitle}」已凯旋,回营地清点战利品吧!`);
+  }, [free, done, session.questTitle]);
+
   return (
-    <div className="adventure" style={{ '--dusk': done ? 1 : pct / 100 }}>
+    <div className="adventure" style={{ '--dusk': dusk }}>
       <div className="adventure-stars">
         {ADV_STARS.map(([x, y], i) => (
           <span key={i} className="star" style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${(i % 6) * 0.4}s` }} />
@@ -127,17 +153,20 @@ function Running({ session, buddy, onComplete, onAbandon, error, busy }) {
         <div className="hill hill-far adv-hill-far" />
         <div className="hill hill-mid adv-hill-mid" />
       </div>
-      <p className="adventure-quest">委托 · {session.questTitle}{session.subjectTag ? ` · ${session.subjectTag}` : ''}</p>
+      <p className="adventure-quest">{free ? '打野 · 自由专注' : `委托 · ${session.questTitle}${session.subjectTag ? ` · ${session.subjectTag}` : ''}`}</p>
       <div className="timer-aura">
-        <TimerRing remainingMs={remainingMs} totalMs={totalMs} done={done} label={done ? '时辰已到' : formatMs(remainingMs)} />
+        <TimerRing remainingMs={ringRemain} totalMs={totalMs} done={done}
+          label={free ? formatMs(elapsedMs) : (done ? '时辰已到' : formatMs(remainingMs))} />
       </div>
-      <small className="dim">旅程 {done ? 100 : pct}%</small>
-      <div className="speech">{done ? '冒险归来,清点战利品吧!' : cheer}</div>
+      <small className="dim">{free ? `已专注 ${elapsedMin} 分钟${elapsedMin >= FREE_CAP_MIN ? '(已封顶)' : ''}` : `旅程 ${done ? 100 : pct}%`}</small>
+      <div className="speech">{!free && done ? '冒险归来,清点战利品吧!' : cheer}</div>
       <div className="adventure-buddy">{buddy}</div>
       {error && <p className="error-line">{error}</p>}
-      {done || error
-        ? <button className="btn btn-big" disabled={busy} onClick={onComplete}>{error ? '重试结算' : <><Icon name="trophy" size={18} /> 凯旋归来</>}</button>
-        : <button className="btn-ghost retreat" onClick={onAbandon}><Icon name="flag" size={14} /> 中途撤退(本次无掉落)</button>}
+      {free
+        ? <button className="btn btn-big" disabled={busy} onClick={onComplete}><Icon name="trophy" size={18} /> {error ? '重试结算' : '结束打野 · 结算'}</button>
+        : (done || error
+          ? <button className="btn btn-big" disabled={busy} onClick={onComplete}>{error ? '重试结算' : <><Icon name="trophy" size={18} /> 凯旋归来</>}</button>
+          : <button className="btn-ghost retreat" onClick={onAbandon}><Icon name="flag" size={14} /> 中途撤退(本次无掉落)</button>)}
     </div>
   );
 }

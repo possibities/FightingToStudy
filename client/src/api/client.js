@@ -18,3 +18,6 @@ export async function api(path, options = {}) {
 // 创建一条委托(自建/再来一次/重复均走这里)
 export const createQuest = ({ title, durationMin, subjectTag = null }) =>
   api('/quests', { method: 'POST', body: { title, durationMin, subjectTag } });
+
+// 打野:开放式专注,随时开始/结束
+export const startFreeRoam = () => api('/sessions/free/start', { method: 'POST' });

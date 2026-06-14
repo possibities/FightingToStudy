@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../state/GameStateContext.jsx';
 import { useToast } from '../components/Toast.jsx';
-import { api, createQuest } from '../api/client.js';
+import { api, createQuest, startFreeRoam } from '../api/client.js';
 import QuestCard from '../components/QuestCard.jsx';
 import CreateQuestModal from '../components/CreateQuestModal.jsx';
 import CampScene from '../components/CampScene.jsx';
@@ -47,6 +47,17 @@ export default function Camp() {
     }
   }
 
+  async function freeRoam() {
+    try {
+      requestNotify(); // 借点击手势申请通知权限
+      await startFreeRoam();
+      await refresh();
+      navigate('/adventure');
+    } catch (e) {
+      toast.show(e.message);
+    }
+  }
+
   const daily = state.quests.filter(q => q.type === 'daily');
   const custom = state.quests.filter(q => q.type === 'custom');
   const egg = state.incubatingEgg;
@@ -55,6 +66,7 @@ export default function Camp() {
     <div className="camp-split">
       <CampScene />
       <section className="quest-panel">
+        <button className="btn btn-big freeroam-btn" onClick={freeRoam}><Icon name="sword" size={18} /> 打野 · 自由专注</button>
         <h3 className="panel-title deco-title"><span className="sec-idx">01</span>今日委托</h3>
         {daily.map(q => <QuestCard key={q.id} quest={q} onStart={startQuest} />)}
         <h3 className="panel-title deco-title"><span className="sec-idx">02</span>自由委托</h3>

@@ -4,6 +4,7 @@ import { expToNext, titleFor } from '../services/leveling.js';
 import { MATERIAL_MAP, SPECIES, SPECIES_MAP, BUILDINGS, TITLES } from '../content/index.js';
 import { toQuestJson } from './quests.js';
 import { ensureDailyQuests } from '../services/dailyQuests.js';
+import { freeQuestId } from '../services/freeRoam.js';
 import { checkWelcomeBack } from '../services/welcomeBack.js';
 
 export function createStateRouter({ db, now, rng }) {
@@ -19,14 +20,16 @@ export function createStateRouter({ db, now, rng }) {
         .map(r => ({ key: r.item_key, name: MATERIAL_MAP[r.item_key].name, emoji: MATERIAL_MAP[r.item_key].emoji, qty: r.qty }));
       const n = now();
       const todayStartIso = new Date(n.getFullYear(), n.getMonth(), n.getDate()).toISOString();
+      const freeQid = freeQuestId(db);
       const quests = db.prepare(
         `SELECT DISTINCT q.* FROM quests q
          LEFT JOIN sessions s ON s.quest_id=q.id AND s.status='completed'
-         WHERE (q.type='daily' AND q.daily_date=?)
+         WHERE ((q.type='daily' AND q.daily_date=?)
             OR (q.type='custom' AND q.status IN ('ready','active'))
-            OR (q.type='custom' AND q.status='done' AND s.completed_at>=?)
+            OR (q.type='custom' AND q.status='done' AND s.completed_at>=?))
+            AND q.id != ?
          ORDER BY q.type DESC, q.id`
-      ).all(today, todayStartIso).map(toQuestJson);
+      ).all(today, todayStartIso, freeQid).map(toQuestJson);
       const knownTags = db.prepare(
         "SELECT subject_tag AS tag, COUNT(*) AS c FROM quests WHERE subject_tag IS NOT NULL GROUP BY subject_tag ORDER BY c DESC, tag LIMIT 8"
       ).all().map(r => r.tag);
@@ -51,6 +54,7 @@ export function createStateRouter({ db, now, rng }) {
         runningSession: running ? {
           id: running.id, questId: running.quest_id, questTitle: running.quest_title, questType: running.quest_type,
           durationMin: running.qmin, subjectTag: running.qtag, startedAt: running.started_at, endsAt: running.ends_at,
+          free: running.kind === 'free',
         } : null,
         incubatingEgg: egg ? { id: egg.id, rarity: egg.rarity, progress: egg.progress, required: egg.required, queueCount } : null,
         buildings, buildingCatalog: BUILDINGS, creatures,

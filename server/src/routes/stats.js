@@ -8,7 +8,10 @@ export function createStatsRouter({ db, now }) {
   router.get('/', (req, res, next) => {
     try {
       const rows = db.prepare(
-        "SELECT q.duration_min AS m, q.subject_tag AS tag, s.completed_at AS at FROM sessions s JOIN quests q ON q.id=s.quest_id WHERE s.status='completed'"
+        `SELECT COALESCE(s.minutes, q.duration_min) AS m,
+                CASE WHEN s.kind='free' THEN '自由打野' ELSE q.subject_tag END AS tag,
+                s.completed_at AS at
+         FROM sessions s JOIN quests q ON q.id=s.quest_id WHERE s.status='completed'`
       ).all();
       const totalMinutes = rows.reduce((sum, r) => sum + r.m, 0);
       const week = [];
