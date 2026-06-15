@@ -3,7 +3,7 @@ import {
   Tent, BookOpenText, ChartColumnBig, Settings, ScrollText, Map as MapIcon, Swords,
   Coins, Sparkles, Egg, Bird, Trophy, Medal, Hourglass, Star, Backpack,
   TreePine, Mountain, Gem, Flame, BookOpen, Hammer, Sprout, Vault, TowerControl, Telescope,
-  Moon, Sun, Check, X, Plus, Flag, ArrowRight, RotateCcw, WandSparkles, Skull, AlertTriangle, HelpCircle,
+  Moon, Sun, Check, X, Plus, Flag, ArrowRight, RotateCcw, WandSparkles, Skull, AlertTriangle, Disc3, HelpCircle,
 } from 'lucide-react';
 
 const MAP = {
@@ -13,13 +13,13 @@ const MAP = {
   scroll: ScrollText, map: MapIcon, sword: Swords, coin: Coins, spark: Sparkles,
   egg: Egg, hatch: Bird, trophy: Trophy, medal: Medal, hourglass: Hourglass, star: Star, backpack: Backpack,
   // 材料(key 同名)
-  wood: TreePine, stone: Mountain, stardust: Sparkles, crystal: Gem,
+  wood: TreePine, stone: Mountain, stardust: Sparkles, crystal: Gem, gem: Gem,
   // 建筑(key 同名)
   campfire: Flame, tent: Tent, library: BookOpen, workshop: Hammer,
   herb_garden: Sprout, treasury: Vault, watchtower: TowerControl, observatory: Telescope,
   // 场景 / 动作
   fire: Flame, moon: Moon, sun: Sun, check: Check, cross: X, plus: Plus,
-  flag: Flag, arrow: ArrowRight, repeat: RotateCcw, skull: Skull, alert: AlertTriangle,
+  flag: Flag, arrow: ArrowRight, repeat: RotateCcw, skull: Skull, alert: AlertTriangle, wheel: Disc3,
 };
 
 export default function Icon({ name, size, strokeWidth = 2, className, ...rest }) {

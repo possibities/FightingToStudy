@@ -6,6 +6,7 @@ import { api, createQuest, startFreeRoam } from '../api/client.js';
 import QuestCard from '../components/QuestCard.jsx';
 import CreateQuestModal from '../components/CreateQuestModal.jsx';
 import CampScene from '../components/CampScene.jsx';
+import Wheel from '../components/Wheel.jsx';
 import Icon from '../components/Icon.jsx';
 import { requestNotify } from '../utils/notify.js';
 
@@ -14,6 +15,7 @@ export default function Camp() {
   const toast = useToast();
   const navigate = useNavigate();
   const [showCreate, setShowCreate] = useState(false);
+  const [showWheel, setShowWheel] = useState(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -78,6 +80,7 @@ export default function Camp() {
       <CampScene />
       <section className="quest-panel">
         <button className="btn btn-big freeroam-btn" onClick={freeRoam} disabled={busy}><Icon name="sword" size={18} /> 打野 · 自由专注</button>
+        <button className="btn-ghost wheel-btn" onClick={() => setShowWheel(true)}><Icon name="wheel" size={16} /> 星夜转盘</button>
         <h3 className="panel-title deco-title"><span className="sec-idx">01</span>今日委托</h3>
         {daily.map(q => <QuestCard key={q.id} quest={q} onStart={startQuest} busy={busy} />)}
         <h3 className="panel-title deco-title"><span className="sec-idx">02</span>自由委托</h3>
@@ -91,6 +94,7 @@ export default function Camp() {
           </div>
         )}
         {showCreate && <CreateQuestModal onClose={() => setShowCreate(false)} />}
+        {showWheel && <Wheel onClose={() => setShowWheel(false)} />}
       </section>
     </div>
   );

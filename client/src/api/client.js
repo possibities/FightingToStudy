@@ -30,3 +30,6 @@ export const addBossTodo = (bossId, { title, durationMin, subjectTag = null }) =
   api(`/bosses/${bossId}/todos`, { method: 'POST', body: { title, durationMin, subjectTag } });
 export const deleteBossTodo = (bossId, todoId) => api(`/bosses/${bossId}/todos/${todoId}`, { method: 'DELETE' });
 export const deleteBoss = (bossId) => api(`/bosses/${bossId}`, { method: 'DELETE' });
+
+// 星夜转盘:count=1 单抽 / 10 十连
+export const spinWheel = (count = 1) => api('/wheel/spin', { method: 'POST', body: { count } });
