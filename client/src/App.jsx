@@ -7,6 +7,7 @@ import { ToastProvider } from './components/Toast.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import StardustTrail from './components/StardustTrail.jsx';
 import Layout from './components/Layout.jsx';
+import Icon from './components/Icon.jsx';
 import Camp from './pages/Camp.jsx';
 
 // 首屏只加载营地;冒险页(含 framer-motion)、图鉴、统计按需分包
@@ -24,7 +25,7 @@ export default function App() {
         <GameStateProvider>
           <StardustTrail />
           <BrowserRouter>
-            <Suspense fallback={<div className="splash">🔥 正在点亮篝火…</div>}>
+            <Suspense fallback={<div className="splash"><Icon name="fire" /> 正在点亮篝火…</div>}>
               <Routes>
                 <Route path="/adventure" element={<Adventure />} />
                 <Route path="/" element={<Layout />}>

@@ -14,6 +14,7 @@ export default function Camp() {
   const toast = useToast();
   const navigate = useNavigate();
   const [showCreate, setShowCreate] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (state.runningSession) navigate('/adventure');
@@ -28,6 +29,8 @@ export default function Camp() {
   }, []);
 
   async function startQuest(quest) {
+    if (busy) return;
+    setBusy(true);
     try {
       requestNotify(); // 借出发这次点击手势申请通知权限,便于专注结束时提醒
       await api(`/quests/${quest.id}/start`, { method: 'POST' });
@@ -35,19 +38,26 @@ export default function Camp() {
       navigate('/adventure');
     } catch (e) {
       toast.show(e.message);
+      setBusy(false);
     }
   }
 
   async function repeatQuest(quest) {
+    if (busy) return;
+    setBusy(true);
     try {
       await createQuest(quest);
       await refresh();
     } catch (e) {
       toast.show(e.message);
+    } finally {
+      setBusy(false);
     }
   }
 
   async function freeRoam() {
+    if (busy) return;
+    setBusy(true);
     try {
       requestNotify(); // 借点击手势申请通知权限
       await startFreeRoam();
@@ -55,6 +65,7 @@ export default function Camp() {
       navigate('/adventure');
     } catch (e) {
       toast.show(e.message);
+      setBusy(false);
     }
   }
 
@@ -66,11 +77,11 @@ export default function Camp() {
     <div className="camp-split">
       <CampScene />
       <section className="quest-panel">
-        <button className="btn btn-big freeroam-btn" onClick={freeRoam}><Icon name="sword" size={18} /> 打野 · 自由专注</button>
+        <button className="btn btn-big freeroam-btn" onClick={freeRoam} disabled={busy}><Icon name="sword" size={18} /> 打野 · 自由专注</button>
         <h3 className="panel-title deco-title"><span className="sec-idx">01</span>今日委托</h3>
-        {daily.map(q => <QuestCard key={q.id} quest={q} onStart={startQuest} />)}
+        {daily.map(q => <QuestCard key={q.id} quest={q} onStart={startQuest} busy={busy} />)}
         <h3 className="panel-title deco-title"><span className="sec-idx">02</span>自由委托</h3>
-        {custom.map(q => <QuestCard key={q.id} quest={q} onStart={startQuest} onRepeat={repeatQuest} />)}
+        {custom.map(q => <QuestCard key={q.id} quest={q} onStart={startQuest} onRepeat={repeatQuest} busy={busy} />)}
         <button className="btn-ghost quest-add" onClick={() => setShowCreate(true)}><Icon name="plus" size={15} /> 自建委托</button>
         {egg && (
           <div className="card egg-card">

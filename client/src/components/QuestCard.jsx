@@ -1,6 +1,6 @@
 import Icon from './Icon.jsx';
 
-export default function QuestCard({ quest, onStart, onRepeat }) {
+export default function QuestCard({ quest, onStart, onRepeat, busy }) {
   const done = quest.status === 'done';
   const failed = quest.status === 'failed' || quest.status === 'expired';
   return (
@@ -19,10 +19,10 @@ export default function QuestCard({ quest, onStart, onRepeat }) {
       </div>
       {done ? (
         quest.type === 'custom' && onRepeat
-          ? <span className="quest-actions"><span className="quest-badge"><Icon name="check" /></span><button className="btn-ghost" title="再来一次" onClick={() => onRepeat(quest)}><Icon name="repeat" size={16} /></button></span>
+          ? <span className="quest-actions"><span className="quest-badge"><Icon name="check" /></span><button className="btn-ghost" title="再来一次" onClick={() => onRepeat(quest)} disabled={busy}><Icon name="repeat" size={16} /></button></span>
           : <span className="quest-badge"><Icon name="check" /></span>
       ) : failed ? <span className="quest-badge dim"><Icon name="cross" /></span>
-        : <button className="btn" onClick={() => onStart(quest)}>出发 <Icon name="arrow" size={15} /></button>}
+        : <button className="btn" onClick={() => onStart(quest)} disabled={busy}>出发 <Icon name="arrow" size={15} /></button>}
     </div>
   );
 }

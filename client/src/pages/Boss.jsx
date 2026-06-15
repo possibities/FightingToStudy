@@ -28,23 +28,31 @@ export default function Boss() {
   const toast = useToast();
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
+  const [busy, setBusy] = useState(false);
 
   const bosses = state.bosses ?? [];
   const active = bosses.filter(b => b.status === 'active');
   const defeated = bosses.filter(b => b.status === 'defeated');
 
   async function newBoss() {
+    if (busy) return;
     if (!title.trim()) { toast.show('给讨伐目标起个名字'); return; }
+    setBusy(true);
     try { await createBoss(title.trim()); setTitle(''); await refresh(); }
     catch (e) { toast.show(e.message); }
+    finally { setBusy(false); }
   }
   async function start(todoId) {
+    if (busy) return;
+    setBusy(true);
     try { requestNotify(); await startQuestById(todoId); await refresh(); navigate('/adventure'); }
-    catch (e) { toast.show(e.message); }
+    catch (e) { toast.show(e.message); setBusy(false); }
   }
   async function freeStart(todoId) {
+    if (busy) return;
+    setBusy(true);
     try { requestNotify(); await startFreeRoam(todoId); await refresh(); navigate('/adventure'); }
-    catch (e) { toast.show(e.message); }
+    catch (e) { toast.show(e.message); setBusy(false); }
   }
 
   return (
@@ -55,11 +63,11 @@ export default function Boss() {
       <div className="boss-new">
         <input className="input" maxLength={40} placeholder="新讨伐目标(如:啃完《操作系统》)"
           value={title} onChange={e => setTitle(e.target.value)} onKeyDown={e => e.key === 'Enter' && newBoss()} />
-        <button className="btn" onClick={newBoss}>立旗</button>
+        <button className="btn" onClick={newBoss} disabled={busy}>立旗</button>
       </div>
 
       {active.length === 0 && <p className="dim" style={{ marginTop: 14 }}>还没有讨伐目标。</p>}
-      {active.map(b => <BossCard key={b.id} boss={b} onStart={start} onFree={freeStart} onChanged={refresh} toast={toast} />)}
+      {active.map(b => <BossCard key={b.id} boss={b} onStart={start} onFree={freeStart} onChanged={refresh} toast={toast} busy={busy} />)}
 
       {defeated.length > 0 && (
         <section>
@@ -80,15 +88,19 @@ export default function Boss() {
   );
 }
 
-function BossCard({ boss, onStart, onFree, onChanged, toast }) {
+function BossCard({ boss, onStart, onFree, onChanged, toast, busy }) {
   const [tTitle, setTTitle] = useState('');
   const [tDur, setTDur] = useState(25);
+  const [adding, setAdding] = useState(false);
   const pct = boss.totalMin > 0 ? Math.round((boss.doneMin / boss.totalMin) * 100) : 0;
 
   async function addTodo() {
+    if (adding) return;
     if (!tTitle.trim()) { toast.show('代办标题?'); return; }
+    setAdding(true);
     try { await addBossTodo(boss.id, { title: tTitle.trim(), durationMin: tDur }); setTTitle(''); await onChanged(); }
     catch (e) { toast.show(e.message); }
+    finally { setAdding(false); }
   }
   async function delTodo(tid) {
     try { await deleteBossTodo(boss.id, tid); await onChanged(); } catch (e) { toast.show(e.message); }
@@ -117,8 +129,8 @@ function BossCard({ boss, onStart, onFree, onChanged, toast }) {
               : t.status === 'active' ? <span className="dim">进行中</span>
                 : (
                   <span className="boss-todo-actions">
-                    <button className="btn-ghost boss-free" title="打野(自由专注,按实际时长结算)" onClick={() => onFree(t.id)}>打野</button>
-                    <button className="btn" onClick={() => onStart(t.id)}>出发 <Icon name="arrow" size={14} /></button>
+                    <button className="btn-ghost boss-free" title="打野(自由专注,按实际时长结算)" onClick={() => onFree(t.id)} disabled={busy}>打野</button>
+                    <button className="btn" onClick={() => onStart(t.id)} disabled={busy}>出发 <Icon name="arrow" size={14} /></button>
                     <button className="boss-del" title="删除代办" onClick={() => delTodo(t.id)}><Icon name="cross" size={14} /></button>
                   </span>
                 )}
@@ -132,7 +144,7 @@ function BossCard({ boss, onStart, onFree, onChanged, toast }) {
         <select value={tDur} onChange={e => setTDur(Number(e.target.value))}>
           {DURATIONS.map(d => <option key={d} value={d}>{d}min</option>)}
         </select>
-        <button className="btn-ghost" title="添加" onClick={addTodo}><Icon name="plus" size={14} /></button>
+        <button className="btn-ghost" title="添加" onClick={addTodo} disabled={adding}><Icon name="plus" size={14} /></button>
       </div>
     </div>
   );

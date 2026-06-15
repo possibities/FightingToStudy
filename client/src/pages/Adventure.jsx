@@ -70,7 +70,7 @@ export default function Adventure() {
   }
 
   if (events) return <RewardSequence events={events} quest={finishedQuest} onDone={done} />;
-  if (!state) return <div className="splash">🔥 正在点亮篝火…</div>;
+  if (!state) return <div className="splash"><Icon name="fire" /> 正在点亮篝火…</div>;
   if (!session) return null;
   const buddy = state.creatures.at(-1)?.emoji ?? '🔥';
   return (

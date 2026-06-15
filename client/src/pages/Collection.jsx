@@ -17,7 +17,7 @@ export default function Collection() {
     });
     return () => ac.abort();
   }, []);
-  if (error) return <p className="dim">📡 {error}</p>;
+  if (error) return <p className="dim"><Icon name="alert" size={14} /> {error}</p>;
   if (!data) return (
     <div>
       <h2 className="deco-title"><Icon name="book" size={20} /> 生物图鉴</h2>

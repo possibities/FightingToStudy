@@ -12,7 +12,7 @@ export default function Stats() {
     });
     return () => ac.abort();
   }, []);
-  if (error) return <p className="dim">📡 {error}</p>;
+  if (error) return <p className="dim"><Icon name="alert" size={14} /> {error}</p>;
   if (!data) return (
     <div>
       <h2 className="deco-title"><Icon name="chart" size={20} /> 冒险统计</h2>

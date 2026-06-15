@@ -3,7 +3,7 @@ import {
   Tent, BookOpenText, ChartColumnBig, Settings, ScrollText, Map as MapIcon, Swords,
   Coins, Sparkles, Egg, Bird, Trophy, Medal, Hourglass, Star, Backpack,
   TreePine, Mountain, Gem, Flame, BookOpen, Hammer, Sprout, Vault, TowerControl, Telescope,
-  Moon, Sun, Check, X, Plus, Flag, ArrowRight, RotateCcw, WandSparkles, Skull, HelpCircle,
+  Moon, Sun, Check, X, Plus, Flag, ArrowRight, RotateCcw, WandSparkles, Skull, AlertTriangle, HelpCircle,
 } from 'lucide-react';
 
 const MAP = {
@@ -19,7 +19,7 @@ const MAP = {
   herb_garden: Sprout, treasury: Vault, watchtower: TowerControl, observatory: Telescope,
   // 场景 / 动作
   fire: Flame, moon: Moon, sun: Sun, check: Check, cross: X, plus: Plus,
-  flag: Flag, arrow: ArrowRight, repeat: RotateCcw, skull: Skull,
+  flag: Flag, arrow: ArrowRight, repeat: RotateCcw, skull: Skull, alert: AlertTriangle,
 };
 
 export default function Icon({ name, size, strokeWidth = 2, className, ...rest }) {
