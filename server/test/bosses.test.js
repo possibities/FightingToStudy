@@ -56,4 +56,20 @@ describe('bosses (讨伐)', () => {
     await request(app).post(`/api/sessions/${start.body.sessionId}/complete`);
     expect((await request(app).delete(`/api/bosses/${boss.id}`)).status).toBe(409); // 有进展不能删
   });
+
+  it('clears a todo via free-roam (打野): marks done, rewards by actual minutes, HP by estimate', async () => {
+    const { app, clock } = makeTestApp();
+    const boss = (await request(app).post('/api/bosses').send({ title: 'G' })).body;
+    const t1 = (await request(app).post(`/api/bosses/${boss.id}/todos`).send({ title: 'A', durationMin: 25 })).body;
+    await request(app).post(`/api/bosses/${boss.id}/todos`).send({ title: 'B', durationMin: 25 });
+    const start = await request(app).post('/api/sessions/free/start').send({ questId: t1.id });
+    expect(start.status).toBe(200);
+    clock.current = new Date(clock.current.getTime() + 10 * 60000); // 实际专注 10 分钟
+    const r = await request(app).post(`/api/sessions/${start.body.sessionId}/complete`);
+    expect(r.body.minutes).toBe(10); // 奖励按实际时长
+    const b = (await request(app).get('/api/state')).body.bosses[0];
+    expect(b.todos.find(t => t.id === t1.id).status).toBe('done'); // 代办标完成
+    expect(b.doneMin).toBe(25); // 进度按代办预估(25),非实际10
+    expect(b.status).toBe('active'); // 还剩 B
+  });
 });

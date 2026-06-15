@@ -12,13 +12,15 @@ export function createStateRouter({ db, now, rng }) {
 
   router.get('/', (req, res, next) => {
     try {
-      ensureDailyQuests(db, now, rng);
-      const today = localDateStr(now());
-      const welcomeBack = checkWelcomeBack(db, now, rng);
+      const current = now();
+      const fixedNow = () => current;
+      ensureDailyQuests(db, fixedNow, rng);
+      const today = localDateStr(current);
+      const welcomeBack = checkWelcomeBack(db, fixedNow, rng);
       const player = db.prepare('SELECT * FROM player WHERE id=1').get();
       const resources = db.prepare('SELECT item_key, qty FROM inventory').all()
         .map(r => ({ key: r.item_key, name: MATERIAL_MAP[r.item_key].name, emoji: MATERIAL_MAP[r.item_key].emoji, qty: r.qty }));
-      const n = now();
+      const n = current;
       const todayStartIso = new Date(n.getFullYear(), n.getMonth(), n.getDate()).toISOString();
       const freeQid = freeQuestId(db);
       const quests = db.prepare(
@@ -44,16 +46,22 @@ export function createStateRouter({ db, now, rng }) {
         .map(c => ({ id: c.id, key: c.species_key, name: SPECIES_MAP[c.species_key]?.name, emoji: SPECIES_MAP[c.species_key]?.emoji, rarity: c.rarity }));
       const collected = db.prepare('SELECT COUNT(DISTINCT species_key) AS c FROM creatures').get().c;
 
-      const bosses = db.prepare("SELECT * FROM bosses ORDER BY (status='active') DESC, id DESC").all().map(b => {
-        const todos = db.prepare('SELECT id, title, duration_min, subject_tag, status FROM quests WHERE boss_id=? ORDER BY id').all(b.id)
-          .map(t => ({ id: t.id, title: t.title, durationMin: t.duration_min, subjectTag: t.subject_tag, status: t.status }));
+      const bossRows = db.prepare("SELECT * FROM bosses ORDER BY (status='active') DESC, id DESC").all();
+      const todosByBoss = new Map();
+      for (const t of db.prepare('SELECT boss_id, id, title, duration_min, subject_tag, status FROM quests WHERE boss_id IS NOT NULL ORDER BY boss_id, id').all()) {
+        const list = todosByBoss.get(t.boss_id) ?? [];
+        list.push({ id: t.id, title: t.title, durationMin: t.duration_min, subjectTag: t.subject_tag, status: t.status });
+        todosByBoss.set(t.boss_id, list);
+      }
+      const bosses = bossRows.map(b => {
+        const todos = todosByBoss.get(b.id) ?? [];
         const totalMin = todos.reduce((s, t) => s + t.durationMin, 0);
         const doneMin = todos.filter(t => t.status === 'done').reduce((s, t) => s + t.durationMin, 0);
         return { id: b.id, title: b.title, status: b.status, titleAward: b.title_award, defeatedAt: b.defeated_at, todos, totalMin, doneMin };
       });
 
       res.json({
-        serverNow: now().toISOString(),
+        serverNow: current.toISOString(),
         player: {
           name: player.name, level: player.level, exp: player.exp, expToNext: expToNext(player.level),
           title: titleFor(player.level, TITLES), gold: player.gold, pityCounter: player.pity_counter,

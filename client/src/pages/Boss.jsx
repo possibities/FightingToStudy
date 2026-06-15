@@ -2,11 +2,26 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../state/GameStateContext.jsx';
 import { useToast } from '../components/Toast.jsx';
-import { createBoss, addBossTodo, deleteBossTodo, deleteBoss, startQuestById } from '../api/client.js';
+import { createBoss, addBossTodo, deleteBossTodo, deleteBoss, startQuestById, startFreeRoam } from '../api/client.js';
 import { requestNotify } from '../utils/notify.js';
 import Icon from '../components/Icon.jsx';
 
 const DURATIONS = [5, 15, 25, 45, 60, 90];
+
+// 目标进度环:已讨时长 / 总时长
+function Ring({ pct }) {
+  const R = 26;
+  const C = 2 * Math.PI * R;
+  return (
+    <svg className="boss-ring" width="64" height="64" viewBox="0 0 64 64" aria-hidden="true">
+      <circle cx="32" cy="32" r={R} fill="none" stroke="var(--card-2)" strokeWidth="6" />
+      <circle cx="32" cy="32" r={R} fill="none" stroke="var(--oxblood)" strokeWidth="6" strokeLinecap="butt"
+        strokeDasharray={C} strokeDashoffset={C * (1 - pct / 100)} transform="rotate(-90 32 32)"
+        style={{ transition: 'stroke-dashoffset .6s cubic-bezier(.2,.85,.25,1)' }} />
+      <text x="32" y="33" textAnchor="middle" dominantBaseline="middle" className="boss-ring-num">{pct}%</text>
+    </svg>
+  );
+}
 
 export default function Boss() {
   const { state, refresh } = useGame();
@@ -27,6 +42,10 @@ export default function Boss() {
     try { requestNotify(); await startQuestById(todoId); await refresh(); navigate('/adventure'); }
     catch (e) { toast.show(e.message); }
   }
+  async function freeStart(todoId) {
+    try { requestNotify(); await startFreeRoam(todoId); await refresh(); navigate('/adventure'); }
+    catch (e) { toast.show(e.message); }
+  }
 
   return (
     <div>
@@ -40,7 +59,7 @@ export default function Boss() {
       </div>
 
       {active.length === 0 && <p className="dim" style={{ marginTop: 14 }}>还没有讨伐目标。</p>}
-      {active.map(b => <BossCard key={b.id} boss={b} onStart={start} onChanged={refresh} toast={toast} />)}
+      {active.map(b => <BossCard key={b.id} boss={b} onStart={start} onFree={freeStart} onChanged={refresh} toast={toast} />)}
 
       {defeated.length > 0 && (
         <section>
@@ -61,7 +80,7 @@ export default function Boss() {
   );
 }
 
-function BossCard({ boss, onStart, onChanged, toast }) {
+function BossCard({ boss, onStart, onFree, onChanged, toast }) {
   const [tTitle, setTTitle] = useState('');
   const [tDur, setTDur] = useState(25);
   const pct = boss.totalMin > 0 ? Math.round((boss.doneMin / boss.totalMin) * 100) : 0;
@@ -81,12 +100,12 @@ function BossCard({ boss, onStart, onChanged, toast }) {
   return (
     <div className="card boss-card">
       <div className="boss-head">
-        <b className="boss-title">{boss.title}</b>
+        <Ring pct={pct} />
+        <div className="boss-head-text">
+          <b className="boss-title">{boss.title}</b>
+          <small className="dim num">{boss.doneMin}/{boss.totalMin} min · 剩 {boss.totalMin - boss.doneMin}</small>
+        </div>
         <button className="boss-del" title="删除目标" onClick={removeBoss}><Icon name="cross" size={16} /></button>
-      </div>
-      <div className="boss-hp">
-        <div className="bar boss-hp-bar"><div style={{ width: `${pct}%` }} /></div>
-        <small className="dim num">{boss.doneMin}/{boss.totalMin} min</small>
       </div>
 
       <div className="boss-todos">
@@ -98,6 +117,7 @@ function BossCard({ boss, onStart, onChanged, toast }) {
               : t.status === 'active' ? <span className="dim">进行中</span>
                 : (
                   <span className="boss-todo-actions">
+                    <button className="btn-ghost boss-free" title="打野(自由专注,按实际时长结算)" onClick={() => onFree(t.id)}>打野</button>
                     <button className="btn" onClick={() => onStart(t.id)}>出发 <Icon name="arrow" size={14} /></button>
                     <button className="boss-del" title="删除代办" onClick={() => delTodo(t.id)}><Icon name="cross" size={14} /></button>
                   </span>

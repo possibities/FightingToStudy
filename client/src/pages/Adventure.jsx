@@ -153,7 +153,7 @@ function Running({ session, buddy, onComplete, onAbandon, error, busy }) {
         <div className="hill hill-far adv-hill-far" />
         <div className="hill hill-mid adv-hill-mid" />
       </div>
-      <p className="adventure-quest">{free ? '打野 · 自由专注' : `委托 · ${session.questTitle}${session.subjectTag ? ` · ${session.subjectTag}` : ''}`}</p>
+      <p className="adventure-quest">{free ? (session.bossId ? `讨伐 · ${session.questTitle}` : '打野 · 自由专注') : `委托 · ${session.questTitle}${session.subjectTag ? ` · ${session.subjectTag}` : ''}`}</p>
       <div className="timer-aura">
         <TimerRing remainingMs={ringRemain} totalMs={totalMs} done={done}
           label={free ? formatMs(elapsedMs) : (done ? '时辰已到' : formatMs(remainingMs))} />

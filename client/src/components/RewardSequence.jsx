@@ -14,7 +14,7 @@ const rarityOf = e => e.rarity ?? e.species?.rarity ?? null;
 
 // 瀑布揭晓:普通行越往后越快(360→220ms),稀有/升级行前留白(hitstop)制造顿挫
 function stepFor(event, idx) {
-  if (RARE_TIERS.includes(rarityOf(event)) || event.type === 'levelup') return 680;
+  if (RARE_TIERS.includes(rarityOf(event)) || event.type === 'levelup' || event.type === 'boss_defeated') return 680;
   return Math.max(220, 360 - idx * 28);
 }
 
@@ -68,6 +68,22 @@ function LegendaryStage({ onDone }) {
   );
 }
 
+// 击败 Boss:全屏接管——骷髅裂碎倒下 + 讨伐成功纹章 + 称号加冕,可点击跳过
+function BossVictory({ data, onDone }) {
+  useEffect(() => {
+    const t = setTimeout(onDone, 2600);
+    return () => clearTimeout(t);
+  }, [onDone]);
+  return (
+    <div className="bossfall" onClick={onDone} role="presentation">
+      <div className="legend-bars" />
+      <div className="bossfall-skull"><Icon name="skull" size={104} /></div>
+      <div className="bossfall-banner">讨伐成功</div>
+      <div className="bossfall-sub">击败「{data.boss}」 · 加冕「{data.title}」</div>
+    </div>
+  );
+}
+
 function FlipCard({ view, rarity, type, onFlip }) {
   const [flipped, setFlipped] = useState(false);
   const tier = RARE_TIERS.includes(rarity) ? rarity : null;
@@ -95,6 +111,7 @@ export default function RewardSequence({ events, quest, onDone }) {
   const [combo, setCombo] = useState(0);
   const [pulse, setPulse] = useState(null);   // 'rare' | 'epic' 面板脉冲
   const [stage, setStage] = useState(false);  // 传说天光接管
+  const [bossWin, setBossWin] = useState(null); // 击败 Boss 全屏接管
   const toast = useToast();
   const pulseT = useRef(0);
 
@@ -105,6 +122,10 @@ export default function RewardSequence({ events, quest, onDone }) {
     const next = events[shown];
     const t = setTimeout(() => {
       if (next.type === 'levelup') { playSfx('levelup'); vibrate(20); }
+      if (next.type === 'boss_defeated') {
+        playSfx('legendary'); vibrate([60, 80, 180]);
+        if (!reduceMotion()) setBossWin({ boss: next.boss, title: next.title });
+      }
       if (FLIP_TYPES.includes(next.type)) setWaitingFlip(true); // 扣牌等待玩家翻开,序列暂停
       else setCombo(c => c + 1);
       setShown(s => s + 1);
@@ -169,6 +190,7 @@ export default function RewardSequence({ events, quest, onDone }) {
         )}
       </div>
       {stage && <LegendaryStage onDone={() => setStage(false)} />}
+      {bossWin && <BossVictory data={bossWin} onDone={() => setBossWin(null)} />}
     </div>
   );
 }

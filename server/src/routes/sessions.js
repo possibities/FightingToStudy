@@ -7,17 +7,29 @@ import { MATERIAL_MAP } from '../content/index.js';
 export function createSessionsRouter({ db, now, rng }) {
   const router = Router();
 
-  // 打野:开放式专注,无时长承诺,结算按实际耗时(见 settlement)
+  // 打野:开放式专注,无时长承诺,结算按实际耗时(见 settlement)。可带 questId 对某条委托(如讨伐代办)打野。
   router.post('/free/start', (req, res, next) => {
     try {
       if (db.prepare("SELECT id FROM sessions WHERE status='running'").get())
         throw new HttpError(409, '已有进行中的冒险');
-      const questId = ensureFreeQuest(db, now);
+      const { questId } = req.body ?? {};
+      let qid;
+      if (questId != null) {
+        const q = db.prepare('SELECT * FROM quests WHERE id=?').get(Number(questId));
+        if (!q) throw new HttpError(404, '没有这个委托');
+        if (q.status !== 'ready') throw new HttpError(409, '这个委托不可出发');
+        qid = q.id;
+      } else {
+        qid = ensureFreeQuest(db, now);
+      }
       const startedAt = now();
       const endsAt = new Date(startedAt.getTime() + 12 * 3600_000); // 哨兵:满足 NOT NULL,打野不看它
-      const info = db.prepare(
-        "INSERT INTO sessions (quest_id, started_at, ends_at, kind) VALUES (?,?,?, 'free')"
-      ).run(questId, startedAt.toISOString(), endsAt.toISOString());
+      const info = db.transaction(() => {
+        const r = db.prepare("INSERT INTO sessions (quest_id, started_at, ends_at, kind) VALUES (?,?,?, 'free')")
+          .run(qid, startedAt.toISOString(), endsAt.toISOString());
+        if (questId != null) db.prepare("UPDATE quests SET status='active' WHERE id=?").run(qid); // 代办置 active
+        return r;
+      })();
       res.json({ sessionId: Number(info.lastInsertRowid), startedAt: startedAt.toISOString() });
     } catch (e) { next(e); }
   });

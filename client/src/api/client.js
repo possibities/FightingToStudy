@@ -19,8 +19,9 @@ export async function api(path, options = {}) {
 export const createQuest = ({ title, durationMin, subjectTag = null }) =>
   api('/quests', { method: 'POST', body: { title, durationMin, subjectTag } });
 
-// 打野:开放式专注,随时开始/结束
-export const startFreeRoam = () => api('/sessions/free/start', { method: 'POST' });
+// 打野:开放式专注,随时开始/结束。带 questId 则对该委托(如讨伐代办)打野
+export const startFreeRoam = (questId = null) =>
+  api('/sessions/free/start', { method: 'POST', body: questId != null ? { questId } : undefined });
 
 // 讨伐(Boss × 代办)
 export const startQuestById = (id) => api(`/quests/${id}/start`, { method: 'POST' });

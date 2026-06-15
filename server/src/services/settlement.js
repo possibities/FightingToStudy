@@ -1,7 +1,7 @@
 import { HttpError } from '../utils/errors.js';
 import { calculateSettlement } from './rewards.js';
 import { aggregateBonuses } from './bonuses.js';
-import { FREE_CAP_MIN } from './freeRoam.js';
+import { FREE_CAP_MIN, freeQuestId } from './freeRoam.js';
 import { BUILDING_MAP, HATCH_REQUIRED } from '../content/index.js';
 
 export function settleSession({ db, sessionId, now, rng }) {
@@ -11,24 +11,28 @@ export function settleSession({ db, sessionId, now, rng }) {
   if (session.status === 'abandoned') throw new HttpError(409, '该次冒险已撤退');
 
   const isFree = session.kind === 'free';
-  const nowIso = now().toISOString();
+  const current = now();
+  const nowIso = current.toISOString();
 
-  if (!isFree && now().getTime() < new Date(session.ends_at).getTime() - 30_000)
+  if (!isFree && current.getTime() < new Date(session.ends_at).getTime() - 30_000)
     throw new HttpError(409, '还没到凯旋时间');
+
+  const quest = db.prepare('SELECT * FROM quests WHERE id=?').get(session.quest_id);
+  const isFreeQuest = quest.id === freeQuestId(db); // 通用打野复用隐藏委托(不标完成);代办打野要标完成
 
   // 打野:按实际耗时结算(封顶 FREE_CAP_MIN);不足 1 分钟直接收场,不给奖励
   let durationMin;
   if (isFree) {
-    const elapsed = Math.floor((now().getTime() - new Date(session.started_at).getTime()) / 60000);
+    const elapsed = Math.floor((current.getTime() - new Date(session.started_at).getTime()) / 60000);
     durationMin = Math.max(0, Math.min(FREE_CAP_MIN, elapsed));
     if (durationMin < 1) {
       db.prepare("UPDATE sessions SET status='abandoned', completed_at=?, minutes=0 WHERE id=?").run(nowIso, sessionId);
+      if (!isFreeQuest) db.prepare("UPDATE quests SET status='ready' WHERE id=?").run(quest.id); // 代办打野不足1分钟→退回 ready
       return { events: [], free: true, minutes: 0 };
     }
+  } else {
+    durationMin = quest.duration_min;
   }
-
-  const quest = db.prepare('SELECT * FROM quests WHERE id=?').get(session.quest_id);
-  if (!isFree) durationMin = quest.duration_min;
 
   return db.transaction(() => {
     const player = db.prepare('SELECT * FROM player WHERE id=1').get();
@@ -55,10 +59,10 @@ export function settleSession({ db, sessionId, now, rng }) {
     if (deltas.eggDropped)
       db.prepare('INSERT INTO eggs (rarity, required, obtained_at) VALUES (?,?,?)')
         .run(deltas.eggDropped.rarity, deltas.eggDropped.required, nowIso);
-    if (!isFree) db.prepare("UPDATE quests SET status='done' WHERE id=?").run(quest.id);
+    if (!isFreeQuest) db.prepare("UPDATE quests SET status='done' WHERE id=?").run(quest.id);
 
     // 讨伐:该委托属于某 Boss 时,若其代办全部完成→击败,发大奖(金币+必得蛋+称号)
-    if (!isFree && quest.boss_id) {
+    if (!isFreeQuest && quest.boss_id) {
       const boss = db.prepare('SELECT * FROM bosses WHERE id=?').get(quest.boss_id);
       const remaining = db.prepare("SELECT COUNT(*) AS c FROM quests WHERE boss_id=? AND status!='done'").get(quest.boss_id).c;
       if (boss && boss.status === 'active' && remaining === 0) {
