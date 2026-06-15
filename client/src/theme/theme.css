@@ -50,7 +50,7 @@ small, .dim { color: var(--text-dim); font-size: 12px; }
 .card { background: var(--card); border: var(--bw) solid var(--line); border-radius: var(--r);
   padding: 14px; box-shadow: var(--shadow); }
 .btn { background: var(--gold); color: var(--gold-ink); border: var(--bw) solid var(--edge); border-radius: var(--r);
-  padding: 8px 16px; font-weight: 800; cursor: inherit; font-size: 14px; letter-spacing: .03em;
+  padding: 8px 16px; font-weight: 800; cursor: inherit; font-size: 14px; letter-spacing: .03em; white-space: nowrap;
   box-shadow: 3px 3px 0 var(--edge); transition: transform .08s ease, box-shadow .08s ease; }
 .btn:hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--edge); }
 .btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--edge); }
@@ -99,7 +99,7 @@ small, .dim { color: var(--text-dim); font-size: 12px; }
   font-weight: 800; letter-spacing: .03em; display: inline-flex; align-items: center; gap: 7px; transition: color .2s ease; }
 .navbar a svg { width: 18px; height: 18px; }
 .navbar a.active { color: var(--gold-ink); }
-.nav-label { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 7px; }
+.nav-label { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
 .nav-cursor { position: absolute; z-index: 0; border-radius: var(--r); background: var(--gold); pointer-events: none;
   border: var(--bw) solid var(--edge);
   transition: left .3s cubic-bezier(.2, .8, .2, 1), width .3s cubic-bezier(.2, .8, .2, 1), top .3s ease, height .3s ease; }
@@ -198,7 +198,7 @@ small, .dim { color: var(--text-dim); font-size: 12px; }
 /* ============ 结算 ============ */
 .reward-mask { position: fixed; inset: 0; background: color-mix(in srgb, var(--edge) 82%, transparent); display: flex; align-items: center; justify-content: center; z-index: 50; }
 .reward-panel { width: min(440px, 92vw); display: flex; flex-direction: column; gap: 10px; text-align: center; padding: 22px; }
-.reward-title { color: var(--gold); margin: 0 0 6px; font-family: var(--serif); letter-spacing: .04em; }
+.reward-title { color: var(--gold); margin: 0 0 6px; font-family: var(--serif); letter-spacing: .04em; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .reward-item { background: var(--bg-soft); border: 1.5px solid var(--border); border-radius: var(--r); padding: 11px; font-weight: 700; display: flex; align-items: center; gap: 8px; justify-content: center; }
 .reward-icon { display: inline-flex; color: var(--gold); }
 .reward-icon svg { width: 20px; height: 20px; }
@@ -403,6 +403,25 @@ small, .dim { color: var(--text-dim); font-size: 12px; }
 .boss-addtodo { display: flex; gap: 8px; align-items: center; }
 .boss-addtodo .input { margin: 0; flex: 1; }
 .boss-addtodo select { background: var(--bg-soft); color: var(--text); border: 1.5px solid var(--border); border-radius: var(--r); padding: 7px 8px; font-family: inherit; }
+
+/* ============ 移动端打磨 ============ */
+/* 顶栏:窄屏让身份行与资源行各占整宽,资源 chip 自然成行而非竖排 */
+@media (max-width: 480px) {
+  .topbar { flex-wrap: wrap; gap: 10px; }
+  .topbar-id { min-width: 0; flex: 1 1 100%; }
+  .topbar-res { flex: 1 1 100%; }
+  /* 讨伐代办:标题占一行,操作按钮换到第二行右对齐,不再挤成多行 */
+  .boss-todo { flex-wrap: wrap; }
+  .boss-todo-actions { width: 100%; justify-content: flex-end; margin-top: 2px; }
+}
+/* 底栏:4 标签 + 齿轮在窄屏改成图标在上、文字在下,收紧间距,杜绝文字竖排折行 */
+@media (max-width: 430px) {
+  .navbar { gap: 2px; padding-left: 4px; padding-right: 4px; }
+  .navbar a { padding: 6px 10px; font-size: 12px; }
+  .nav-label { flex-direction: column; gap: 3px; }
+  .navbar a svg { width: 18px; height: 18px; }
+  .nav-gear { padding: 6px 8px; align-self: stretch; }
+}
 
 /* ============ 减少动态效果:由 MotionProvider 按「动效」设置切换 <html>.reduce-motion(跟随系统/开/关) ============ */
 :root.reduce-motion *, :root.reduce-motion *::before, :root.reduce-motion *::after {

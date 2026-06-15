@@ -168,7 +168,7 @@ export default function RewardSequence({ events, quest, onDone }) {
   return (
     <div className="reward-mask">
       <div className={`reward-panel card${pulse ? ` panel-pulse pulse-${pulse}` : ''}`}>
-        <h2 className="reward-title">⚔️ 委托完成!</h2>
+        <h2 className="reward-title"><Icon name="sword" size={22} /> 委托完成!</h2>
         {combo >= 3 && <div className="combo-badge" key={combo}>连击 ×{combo}</div>}
         <AnimatePresence>
           {events.slice(0, shown).map((e, i) => {
