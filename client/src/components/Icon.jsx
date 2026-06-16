@@ -3,7 +3,8 @@ import {
   Tent, BookOpenText, ChartColumnBig, Settings, ScrollText, Map as MapIcon, Swords,
   Coins, Sparkles, Egg, Bird, Trophy, Medal, Hourglass, Star, Backpack,
   TreePine, Mountain, Gem, Flame, BookOpen, Hammer, Sprout, Vault, TowerControl, Telescope,
-  Moon, Sun, Check, X, Plus, Flag, ArrowRight, RotateCcw, WandSparkles, Skull, AlertTriangle, Disc3, HelpCircle,
+  Moon, Sun, Check, X, Plus, Flag, ArrowRight, RotateCcw, WandSparkles, Skull, AlertTriangle, Disc3,
+  Dices, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6, HelpCircle,
 } from 'lucide-react';
 
 const MAP = {
@@ -20,6 +21,7 @@ const MAP = {
   // 场景 / 动作
   fire: Flame, moon: Moon, sun: Sun, check: Check, cross: X, plus: Plus,
   flag: Flag, arrow: ArrowRight, repeat: RotateCcw, skull: Skull, alert: AlertTriangle, wheel: Disc3,
+  dice: Dices, dice1: Dice1, dice2: Dice2, dice3: Dice3, dice4: Dice4, dice5: Dice5, dice6: Dice6,
 };
 
 export default function Icon({ name, size, strokeWidth = 2, className, ...rest }) {

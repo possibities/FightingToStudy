@@ -37,3 +37,6 @@ export const spinWheel = (count = 1) => api('/wheel/spin', { method: 'POST', bod
 // 营地农园
 export const plantCrop = (slotIndex, crop) => api('/farm/plant', { method: 'POST', body: { slotIndex, crop } });
 export const harvestCrop = (slotIndex) => api('/farm/harvest', { method: 'POST', body: { slotIndex } });
+
+// 篝火骰戏:choice='big'|'small'
+export const rollDice = (choice, bet) => api('/dice/roll', { method: 'POST', body: { choice, bet } });

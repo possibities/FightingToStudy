@@ -8,6 +8,7 @@ import CreateQuestModal from '../components/CreateQuestModal.jsx';
 import CampScene from '../components/CampScene.jsx';
 import Wheel from '../components/Wheel.jsx';
 import Farm from '../components/Farm.jsx';
+import Dice from '../components/Dice.jsx';
 import Icon from '../components/Icon.jsx';
 import { requestNotify } from '../utils/notify.js';
 
@@ -18,6 +19,7 @@ export default function Camp() {
   const [showCreate, setShowCreate] = useState(false);
   const [showWheel, setShowWheel] = useState(false);
   const [showFarm, setShowFarm] = useState(false);
+  const [showDice, setShowDice] = useState(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -84,6 +86,7 @@ export default function Camp() {
         <button className="btn btn-big freeroam-btn" onClick={freeRoam} disabled={busy}><Icon name="sword" size={18} /> 打野 · 自由专注</button>
         <button className="btn-ghost wheel-btn" onClick={() => setShowWheel(true)}><Icon name="wheel" size={16} /> 星夜转盘</button>
         <button className="btn-ghost wheel-btn" onClick={() => setShowFarm(true)}><Icon name="sprout" size={16} /> 营地农园</button>
+        <button className="btn-ghost wheel-btn" onClick={() => setShowDice(true)}><Icon name="dice" size={16} /> 篝火骰戏</button>
         <h3 className="panel-title deco-title"><span className="sec-idx">01</span>今日委托</h3>
         {daily.map(q => <QuestCard key={q.id} quest={q} onStart={startQuest} busy={busy} />)}
         <h3 className="panel-title deco-title"><span className="sec-idx">02</span>自由委托</h3>
@@ -99,6 +102,7 @@ export default function Camp() {
         {showCreate && <CreateQuestModal onClose={() => setShowCreate(false)} />}
         {showWheel && <Wheel onClose={() => setShowWheel(false)} />}
         {showFarm && <Farm onClose={() => setShowFarm(false)} />}
+        {showDice && <Dice onClose={() => setShowDice(false)} />}
       </section>
     </div>
   );
