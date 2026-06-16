@@ -5,6 +5,7 @@ import { MATERIAL_MAP, SPECIES, SPECIES_MAP, BUILDINGS, TITLES } from '../conten
 import { toQuestJson } from './quests.js';
 import { ensureDailyQuests } from '../services/dailyQuests.js';
 import { freeQuestId } from '../services/freeRoam.js';
+import { CROPS, FARM_PLOTS } from './farm.js';
 import { checkWelcomeBack } from '../services/welcomeBack.js';
 
 export function createStateRouter({ db, now, rng }) {
@@ -60,13 +61,18 @@ export function createStateRouter({ db, now, rng }) {
         return { id: b.id, title: b.title, status: b.status, titleAward: b.title_award, defeatedAt: b.defeated_at, todos, totalMin, doneMin };
       });
 
+      const farm = db.prepare('SELECT slot_index, crop, progress, required FROM farm ORDER BY slot_index').all().map(p => ({
+        slotIndex: p.slot_index, crop: p.crop, name: CROPS[p.crop]?.name, emoji: CROPS[p.crop]?.emoji,
+        progress: p.progress, required: p.required, ready: p.progress >= p.required,
+      }));
+
       res.json({
         serverNow: current.toISOString(),
         player: {
           name: player.name, level: player.level, exp: player.exp, expToNext: expToNext(player.level),
           title: titleFor(player.level, TITLES), gold: player.gold, pityCounter: player.pity_counter,
         },
-        resources, quests, knownTags, bosses,
+        resources, quests, knownTags, bosses, farm, farmPlots: FARM_PLOTS,
         runningSession: running ? {
           id: running.id, questId: running.quest_id, questTitle: running.quest_title, questType: running.quest_type,
           durationMin: running.qmin, subjectTag: running.qtag, startedAt: running.started_at, endsAt: running.ends_at,

@@ -28,6 +28,7 @@ function eventView(e) {
     case 'egg_progress': return { iconName: 'hatch', text: `孵化进度 ${e.progress}/${e.required}`, cls: `rarity-${e.rarity}` };
     case 'hatch': return { icon: e.species.emoji, text: `孵化了「${e.species.name}」!${e.species.flavor}`, cls: `rarity-${e.species.rarity}` };
     case 'boss_defeated': return { iconName: 'skull', text: `讨伐成功!击败「${e.boss}」 · 称号「${e.title}」`, cls: 'rarity-legendary' };
+    case 'farm_grow': return { iconName: 'sprout', text: `农园 ${e.grown} 株作物 +1 成长` };
     default: return { icon: '❔', text: '???' };
   }
 }

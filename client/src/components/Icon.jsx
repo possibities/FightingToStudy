@@ -16,7 +16,7 @@ const MAP = {
   wood: TreePine, stone: Mountain, stardust: Sparkles, crystal: Gem, gem: Gem,
   // 建筑(key 同名)
   campfire: Flame, tent: Tent, library: BookOpen, workshop: Hammer,
-  herb_garden: Sprout, treasury: Vault, watchtower: TowerControl, observatory: Telescope,
+  herb_garden: Sprout, treasury: Vault, watchtower: TowerControl, observatory: Telescope, sprout: Sprout,
   // 场景 / 动作
   fire: Flame, moon: Moon, sun: Sun, check: Check, cross: X, plus: Plus,
   flag: Flag, arrow: ArrowRight, repeat: RotateCcw, skull: Skull, alert: AlertTriangle, wheel: Disc3,

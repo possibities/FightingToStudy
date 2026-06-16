@@ -9,6 +9,7 @@ import { createStatsRouter } from './routes/stats.js';
 import { createBuildingsRouter } from './routes/buildings.js';
 import { createBossesRouter } from './routes/bosses.js';
 import { createWheelRouter } from './routes/wheel.js';
+import { createFarmRouter } from './routes/farm.js';
 
 function ensureBootstrap(db, now) {
   const nowIso = now().toISOString();
@@ -30,6 +31,7 @@ export function createApp({ db, now = () => new Date(), rng = Math.random, stati
   app.use('/api/buildings', createBuildingsRouter(deps));
   app.use('/api/bosses', createBossesRouter(deps));
   app.use('/api/wheel', createWheelRouter(deps));
+  app.use('/api/farm', createFarmRouter(deps));
   if (staticDir) {
     app.use(express.static(staticDir));
     app.get(/^(?!\/api).*/, (req, res) => res.sendFile(path.join(staticDir, 'index.html')));

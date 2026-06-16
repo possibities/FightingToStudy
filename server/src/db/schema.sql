@@ -66,3 +66,11 @@ CREATE TABLE IF NOT EXISTS bosses (
   created_at TEXT NOT NULL,
   defeated_at TEXT
 );
+CREATE TABLE IF NOT EXISTS farm (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  slot_index INTEGER NOT NULL UNIQUE,
+  crop TEXT NOT NULL,
+  progress INTEGER NOT NULL DEFAULT 0,
+  required INTEGER NOT NULL,
+  planted_at TEXT NOT NULL
+);

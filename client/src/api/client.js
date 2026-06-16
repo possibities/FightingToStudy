@@ -33,3 +33,7 @@ export const deleteBoss = (bossId) => api(`/bosses/${bossId}`, { method: 'DELETE
 
 // 星夜转盘:count=1 单抽 / 10 十连
 export const spinWheel = (count = 1) => api('/wheel/spin', { method: 'POST', body: { count } });
+
+// 营地农园
+export const plantCrop = (slotIndex, crop) => api('/farm/plant', { method: 'POST', body: { slotIndex, crop } });
+export const harvestCrop = (slotIndex) => api('/farm/harvest', { method: 'POST', body: { slotIndex } });

@@ -77,6 +77,12 @@ export function settleSession({ db, sessionId, now, rng }) {
         events.push({ type: 'egg', rarity, pity: false });
       }
     }
+    // 农园:每完成一次专注,生长中的作物 +1(成熟后可收获)
+    const growing = db.prepare('SELECT COUNT(*) AS c FROM farm WHERE progress < required').get().c;
+    if (growing > 0) {
+      db.prepare('UPDATE farm SET progress = MIN(progress + 1, required) WHERE progress < required').run();
+      events.push({ type: 'farm_grow', grown: growing });
+    }
     const payload = isFree ? { events, free: true, minutes: durationMin } : { events };
     db.prepare("UPDATE sessions SET status='completed', completed_at=?, settlement_json=?, minutes=? WHERE id=?")
       .run(nowIso, JSON.stringify(payload), durationMin, sessionId);
