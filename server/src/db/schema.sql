@@ -74,3 +74,7 @@ CREATE TABLE IF NOT EXISTS farm (
   required INTEGER NOT NULL,
   planted_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS achievements (
+  key TEXT PRIMARY KEY,
+  claimed_at TEXT NOT NULL
+);

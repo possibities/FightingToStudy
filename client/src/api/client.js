@@ -40,3 +40,6 @@ export const harvestCrop = (slotIndex) => api('/farm/harvest', { method: 'POST',
 
 // 篝火骰戏:choice='big'|'small'
 export const rollDice = (choice, bet) => api('/dice/roll', { method: 'POST', body: { choice, bet } });
+
+// 成就:领取已达成成就的奖励(金币/蛋/材料)
+export const claimAchievement = (key) => api(`/achievements/${key}/claim`, { method: 'POST' });

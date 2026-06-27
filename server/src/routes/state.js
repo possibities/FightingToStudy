@@ -7,6 +7,7 @@ import { ensureDailyQuests } from '../services/dailyQuests.js';
 import { freeQuestId } from '../services/freeRoam.js';
 import { CROPS, FARM_PLOTS } from './farm.js';
 import { diceRemaining } from './dice.js';
+import { computeAchievements } from '../services/achievements.js';
 import { checkWelcomeBack } from '../services/welcomeBack.js';
 
 export function createStateRouter({ db, now, rng }) {
@@ -73,7 +74,7 @@ export function createStateRouter({ db, now, rng }) {
           name: player.name, level: player.level, exp: player.exp, expToNext: expToNext(player.level),
           title: titleFor(player.level, TITLES), gold: player.gold, pityCounter: player.pity_counter,
         },
-        resources, quests, knownTags, bosses, farm, farmPlots: FARM_PLOTS, diceRemaining: diceRemaining(db, current),
+        resources, quests, knownTags, bosses, farm, farmPlots: FARM_PLOTS, diceRemaining: diceRemaining(db, current), achievements: computeAchievements(db),
         runningSession: running ? {
           id: running.id, questId: running.quest_id, questTitle: running.quest_title, questType: running.quest_type,
           durationMin: running.qmin, subjectTag: running.qtag, startedAt: running.started_at, endsAt: running.ends_at,
