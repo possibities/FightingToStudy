@@ -84,19 +84,26 @@ export default function Camp() {
       <CampScene />
       <section className="quest-panel">
         <button className="btn btn-big freeroam-btn" onClick={freeRoam} disabled={busy}><Icon name="sword" size={18} /> 打野 · 自由专注</button>
-        <button className="btn-ghost wheel-btn" onClick={() => setShowWheel(true)}><Icon name="wheel" size={16} /> 星夜转盘</button>
-        <button className="btn-ghost wheel-btn" onClick={() => setShowFarm(true)}><Icon name="sprout" size={16} /> 营地农园</button>
-        <button className="btn-ghost wheel-btn" onClick={() => setShowDice(true)}><Icon name="dice" size={16} /> 篝火骰戏</button>
-        <h3 className="panel-title deco-title"><span className="sec-idx">01</span>今日委托</h3>
-        {daily.map(q => <QuestCard key={q.id} quest={q} onStart={startQuest} busy={busy} />)}
-        <h3 className="panel-title deco-title"><span className="sec-idx">02</span>自由委托</h3>
-        {custom.map(q => <QuestCard key={q.id} quest={q} onStart={startQuest} onRepeat={repeatQuest} busy={busy} />)}
-        <button className="btn-ghost quest-add" onClick={() => setShowCreate(true)}><Icon name="plus" size={15} /> 自建委托</button>
+        <div className="mini-row">
+          <button className="btn-ghost wheel-btn" onClick={() => setShowWheel(true)}><Icon name="wheel" size={15} /> 星夜转盘</button>
+          <button className="btn-ghost wheel-btn" onClick={() => setShowFarm(true)}><Icon name="sprout" size={15} /> 营地农园</button>
+          <button className="btn-ghost wheel-btn" onClick={() => setShowDice(true)}><Icon name="dice" size={15} /> 篝火骰戏</button>
+        </div>
+        <div className="quest-scroll">
+          <h3 className="panel-title deco-title"><span className="sec-idx">01</span>今日委托</h3>
+          {daily.map(q => <QuestCard key={q.id} quest={q} onStart={startQuest} busy={busy} />)}
+          <h3 className="panel-title deco-title"><span className="sec-idx">02</span>自由委托</h3>
+          {custom.map(q => <QuestCard key={q.id} quest={q} onStart={startQuest} onRepeat={repeatQuest} busy={busy} />)}
+          <button className="btn-ghost quest-add" onClick={() => setShowCreate(true)}><Icon name="plus" size={15} /> 自建委托</button>
+        </div>
         {egg && (
           <div className="card egg-card">
-            <span><Icon name="egg" size={16} /> <b className={`rarity-${egg.rarity}`}>孵化中</b>{egg.queueCount > 1 ? <small className="dim"> · 队列 <span className="num">{egg.queueCount}</span></small> : null}</span>
-            <div className="bar"><div style={{ width: `${(egg.progress / egg.required) * 100}%` }} /></div>
-            <small className="dim">再专注 <span className="num">{egg.required - egg.progress}</span> 次就孵出来了!</small>
+            <span className="egg-line">
+              <Icon name="egg" size={15} />
+              <b className={`rarity-${egg.rarity}`}>孵化中</b>
+              <span className="bar"><div style={{ width: `${(egg.progress / egg.required) * 100}%` }} /></span>
+              <small className="dim">再专注 <span className="num">{egg.required - egg.progress}</span> 次就孵出来了!{egg.queueCount > 1 ? <> · 队列 <span className="num">{egg.queueCount}</span></> : null}</small>
+            </span>
           </div>
         )}
         {/* 保底:pity>=4 必掉蛋(server rewards.js),故 5-N */}
