@@ -11,7 +11,7 @@ export function createAchievementsRouter({ db, now }) {
       const def = ACHIEVEMENTS.find(a => a.key === req.params.key);
       if (!def) throw new HttpError(404, '没有这个成就');
       if (db.prepare('SELECT key FROM achievements WHERE key=?').get(def.key)) throw new HttpError(409, '该成就已领取');
-      const metrics = computeMetrics(db);
+      const metrics = computeMetrics(db, now());
       if ((metrics[def.metric] ?? 0) < def.threshold) throw new HttpError(409, '成就尚未达成');
       db.transaction(() => {
         const r = def.reward;

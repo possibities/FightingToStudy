@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { SPECIES, TITLES } from '../content/index.js';
 import { titleFor } from '../services/leveling.js';
+import { computeStreak } from '../services/streak.js';
 import { localDateStr } from '../utils/dates.js';
 
 export function createStatsRouter({ db, now }) {
@@ -29,6 +30,7 @@ export function createStatsRouter({ db, now }) {
       const collected = db.prepare('SELECT COUNT(DISTINCT species_key) AS c FROM creatures').get().c;
       const buildingCount = db.prepare('SELECT COUNT(*) AS c FROM buildings').get().c;
       res.json({
+        streak: computeStreak(db, now()),
         totalMinutes,
         totalSessions: rows.length,
         level: player.level,

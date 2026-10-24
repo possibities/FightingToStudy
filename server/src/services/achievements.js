@@ -1,5 +1,6 @@
 // 成就系统:静态定义 + 按实时数据算进度;达成且未领取→可领奖(金币/蛋)。
 // metric 取自现有数据,无需额外埋点。
+import { computeStreak } from './streak.js';
 
 export const ACHIEVEMENTS = [
   { key: 'first_focus', name: '初次出击', desc: '完成第 1 次专注', icon: 'sword', metric: 'sessions', threshold: 1, reward: { kind: 'gold', amount: 20 } },
@@ -14,9 +15,11 @@ export const ACHIEVEMENTS = [
   { key: 'collect_12', name: '图鉴过半', desc: '收集 12 种生物', icon: 'book', metric: 'collected', threshold: 12, reward: { kind: 'egg', rarity: 'rare' } },
   { key: 'collect_24', name: '万物图鉴', desc: '集齐全部 24 种生物', icon: 'book', metric: 'collected', threshold: 24, reward: { kind: 'egg', rarity: 'legendary' } },
   { key: 'boss_1', name: '讨伐者', desc: '首次击败一个讨伐目标', icon: 'skull', metric: 'bossesDefeated', threshold: 1, reward: { kind: 'gold', amount: 80 } },
+  { key: 'streak_3', name: '三日之约', desc: '最长连续 3 天完成专注', icon: 'fire', metric: 'streakBest', threshold: 3, reward: { kind: 'gold', amount: 80 } },
+  { key: 'streak_7', name: '七日星火', desc: '最长连续 7 天完成专注', icon: 'fire', metric: 'streakBest', threshold: 7, reward: { kind: 'egg', rarity: 'epic' } },
 ];
 
-export function computeMetrics(db) {
+export function computeMetrics(db, now) {
   return {
     focusMinutes: db.prepare("SELECT COALESCE(SUM(COALESCE(s.minutes, q.duration_min)), 0) AS v FROM sessions s JOIN quests q ON q.id=s.quest_id WHERE s.status='completed'").get().v,
     sessions: db.prepare("SELECT COUNT(*) AS v FROM sessions WHERE status='completed'").get().v,
@@ -25,11 +28,12 @@ export function computeMetrics(db) {
     bossesDefeated: db.prepare("SELECT COUNT(*) AS v FROM bosses WHERE status='defeated'").get().v,
     buildings: db.prepare('SELECT COUNT(*) AS v FROM buildings').get().v,
     hatched: db.prepare('SELECT COUNT(*) AS v FROM creatures').get().v,
+    streakBest: computeStreak(db, now).best,
   };
 }
 
-export function computeAchievements(db) {
-  const metrics = computeMetrics(db);
+export function computeAchievements(db, now) {
+  const metrics = computeMetrics(db, now);
   const claimed = new Set(db.prepare('SELECT key FROM achievements').all().map(r => r.key));
   return ACHIEVEMENTS.map(a => {
     const progress = metrics[a.metric] ?? 0;

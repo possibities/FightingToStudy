@@ -19,7 +19,7 @@ describe('achievements (成就系统)', () => {
     expect(res.status).toBe(200);
     const ach = res.body.achievements;
     expect(Array.isArray(ach)).toBe(true);
-    expect(ach.length).toBeGreaterThanOrEqual(12);
+    expect(ach.length).toBeGreaterThanOrEqual(14);
     expect(ach.find(a => a.key === 'first_focus')).toMatchObject({ unlocked: false, claimed: false, progress: 0, threshold: 1 });
   });
 
