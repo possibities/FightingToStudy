@@ -44,6 +44,14 @@ describe('streak (连续专注天数)', () => {
     expect((await request(app).get('/api/stats')).body.streak).toEqual({ current: 1, best: 3 });
   });
 
+  it('cross-month chain counts once per day for best; current 0 when detached from today', async () => {
+    const { app, db } = makeTestApp(); // 今天 = 2026-06-11
+    completeOn(db, '2026-06-30T10:00:00');
+    completeOn(db, '2026-07-01T10:00:00');
+    completeOn(db, '2026-07-02T10:00:00'); // 跨月链 3 天,但今天 06-11 与 06-10 均无记录 → 断档
+    expect((await request(app).get('/api/stats')).body.streak).toEqual({ current: 0, best: 3 });
+  });
+
   it('feeds streakBest achievement metric (streak_3)', async () => {
     const { app, db } = makeTestApp();
     completeOn(db, '2026-06-09T10:00:00');
