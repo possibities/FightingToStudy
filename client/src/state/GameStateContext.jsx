@@ -29,4 +29,5 @@ export function GameStateProvider({ children }) {
   return <Ctx.Provider value={{ state, refresh, error }}>{children}</Ctx.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- context 模块按惯例同时导出 Provider 与 hook
 export const useGame = () => useContext(Ctx);

@@ -20,4 +20,5 @@ export function ToastProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- context 模块按惯例同时导出 Provider 与 hook
 export const useToast = () => useContext(ToastCtx);

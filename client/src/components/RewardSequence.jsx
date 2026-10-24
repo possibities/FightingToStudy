@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+// eslint-disable-next-line no-unused-vars -- motion 只在 <motion.div> 成员表达式中使用,core eslint 不跟踪 JSX 引用
 import { motion, AnimatePresence } from 'framer-motion';
 import { createQuest } from '../api/client.js';
 import { useToast } from './Toast.jsx';
