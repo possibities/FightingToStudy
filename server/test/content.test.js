@@ -29,8 +29,10 @@ describe('content data', () => {
   it('materials, templates, titles, weights are sane', () => {
     expect(MATERIALS.map(m => m.key)).toEqual(['wood', 'stone', 'stardust', 'crystal']);
     expect(QUEST_TEMPLATES.map(t => t.durationMin)).toEqual([5, 25, 45]);
-    expect(TITLES).toHaveLength(10);
+    expect(TITLES).toHaveLength(13);
     expect(Object.keys(RARITY_WEIGHTS)).toEqual(['common', 'rare', 'epic', 'legendary']);
     expect(HATCH_REQUIRED).toEqual({ common: 3, rare: 5, epic: 8, legendary: 12 });
+    for (const t of QUEST_TEMPLATES) expect(new Set(t.titles).size).toBe(t.titles.length);
+    for (let i = 1; i < TITLES.length; i++) expect(TITLES[i].level).toBeGreaterThan(TITLES[i - 1].level);
   });
 });

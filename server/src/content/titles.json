@@ -8,5 +8,8 @@
   { "level": 30, "title": "贤者之徒" },
   { "level": 35, "title": "奥术贤者" },
   { "level": 40, "title": "传奇冒险家" },
-  { "level": 45, "title": "星夜守望者" }
+  { "level": 45, "title": "星夜守望者" },
+  { "level": 50, "title": "低语星辰" },
+  { "level": 55, "title": "永恒旅人" },
+  { "level": 60, "title": "星海化身" }
 ]

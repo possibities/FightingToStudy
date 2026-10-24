@@ -1,7 +1,9 @@
 // 成就系统:静态定义 + 按实时数据算进度;达成且未领取→可领奖(金币/蛋)。
 // metric 取自现有数据,无需额外埋点。
 import { computeStreak } from './streak.js';
+import { SPECIES } from '../content/index.js';
 
+// collect_* 的 key 是 achievements 表主键,历史存档按 key 记录——物种数变化时只动 threshold/desc,key 永不改。
 export const ACHIEVEMENTS = [
   { key: 'first_focus', name: '初次出击', desc: '完成第 1 次专注', icon: 'sword', metric: 'sessions', threshold: 1, reward: { kind: 'gold', amount: 20 } },
   { key: 'sessions_10', name: '渐入佳境', desc: '累计完成 10 次专注', icon: 'sword', metric: 'sessions', threshold: 10, reward: { kind: 'gold', amount: 100 } },
@@ -12,8 +14,8 @@ export const ACHIEVEMENTS = [
   { key: 'level_5', name: '小有名气', desc: '达到等级 5', icon: 'medal', metric: 'level', threshold: 5, reward: { kind: 'gold', amount: 100 } },
   { key: 'level_10', name: '声名远扬', desc: '达到等级 10', icon: 'medal', metric: 'level', threshold: 10, reward: { kind: 'egg', rarity: 'epic' } },
   { key: 'collect_1', name: '第一个伙伴', desc: '收集第 1 种生物', icon: 'book', metric: 'collected', threshold: 1, reward: { kind: 'gold', amount: 30 } },
-  { key: 'collect_12', name: '图鉴过半', desc: '收集 12 种生物', icon: 'book', metric: 'collected', threshold: 12, reward: { kind: 'egg', rarity: 'rare' } },
-  { key: 'collect_24', name: '万物图鉴', desc: '集齐全部 24 种生物', icon: 'book', metric: 'collected', threshold: 24, reward: { kind: 'egg', rarity: 'legendary' } },
+  { key: 'collect_12', name: '图鉴过半', desc: `收集 ${Math.floor(SPECIES.length / 2)} 种生物`, icon: 'book', metric: 'collected', threshold: Math.floor(SPECIES.length / 2), reward: { kind: 'egg', rarity: 'rare' } },
+  { key: 'collect_24', name: '万物图鉴', desc: `集齐全部 ${SPECIES.length} 种生物`, icon: 'book', metric: 'collected', threshold: SPECIES.length, reward: { kind: 'egg', rarity: 'legendary' } },
   { key: 'boss_1', name: '讨伐者', desc: '首次击败一个讨伐目标', icon: 'skull', metric: 'bossesDefeated', threshold: 1, reward: { kind: 'gold', amount: 80 } },
   { key: 'streak_3', name: '三日之约', desc: '最长连续 3 天完成专注', icon: 'fire', metric: 'streakBest', threshold: 3, reward: { kind: 'gold', amount: 80 } },
   { key: 'streak_7', name: '七日星火', desc: '最长连续 7 天完成专注', icon: 'fire', metric: 'streakBest', threshold: 7, reward: { kind: 'egg', rarity: 'epic' } },

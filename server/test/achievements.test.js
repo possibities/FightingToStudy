@@ -79,4 +79,12 @@ describe('achievements (成就系统)', () => {
     expect(ach.find(a => a.key === 'collect_1')).toMatchObject({ unlocked: true });
     expect(ach.find(a => a.key === 'boss_1')).toMatchObject({ unlocked: true });
   });
+
+  it('collection achievements track SPECIES length (content-decoupled)', async () => {
+    const { app } = makeTestApp();
+    const { SPECIES } = await import('../src/content/index.js');
+    const ach = (await request(app).get('/api/state')).body.achievements;
+    expect(ach.find(a => a.key === 'collect_24').threshold).toBe(SPECIES.length);
+    expect(ach.find(a => a.key === 'collect_12').threshold).toBe(Math.floor(SPECIES.length / 2));
+  });
 });
