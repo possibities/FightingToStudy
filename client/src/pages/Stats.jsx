@@ -95,7 +95,7 @@ export default function Stats() {
   if (!data) return (
     <div>
       <h2 className="deco-title"><Icon name="chart" size={20} /> 冒险统计</h2>
-      <div className="stat-cards">{Array.from({ length: 5 }, (_, i) => <div key={i} className="skel skel-stat" />)}</div>
+      <div className="stat-cards">{Array.from({ length: 6 }, (_, i) => <div key={i} className="skel skel-stat" />)}</div>
       <div className="skel skel-block" />
     </div>
   );
@@ -110,6 +110,7 @@ export default function Stats() {
         <div className="card stat-card"><span className="stat-ico"><Icon name="medal" /></span><b className="num">Lv{data.level}</b><small className="dim">{data.title}</small></div>
         <div className="card stat-card"><span className="stat-ico"><Icon name="book" /></span><b className="num">{data.collection.collected}/{data.collection.total}</b><small className="dim">图鉴收集</small></div>
         <div className="card stat-card"><span className="stat-ico"><Icon name="camp" /></span><b className="num">{data.buildingCount}</b><small className="dim">营地建筑</small></div>
+        <div className="card stat-card"><span className="stat-ico"><Icon name="fire" /></span><b className="num">{data.streak.current}天</b><small className="dim">连续专注 · 最长{data.streak.best}天</small></div>
       </div>
       <Achievements />
       <div className="card">
