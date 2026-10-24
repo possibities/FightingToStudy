@@ -33,9 +33,14 @@ describe('Camp 保底提示', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('shows pity hint when pityCounter >= 2', () => {
-    renderCamp({ player: { pityCounter: 3 } });
-    expect(pityHint()?.textContent).toContain('已连空 3 次');
-    expect(pityHint()?.textContent).toContain('再专注 2 次必得蛋');
+    renderCamp({ player: { pityCounter: 2 } });
+    expect(pityHint()?.textContent).toContain('已连空 2 次');
+    expect(pityHint()?.textContent).toContain('再专注 3 次');
+  });
+
+  it('shows 1 remaining when pityCounter = 4', () => {
+    renderCamp({ player: { pityCounter: 4 } });
+    expect(pityHint()?.textContent).toContain('再专注 1 次');
   });
 
   it('hides pity hint when pityCounter < 2', () => {
