@@ -99,6 +99,11 @@ export default function Camp() {
             <small className="dim">再专注 <span className="num">{egg.required - egg.progress}</span> 次就孵出来了!</small>
           </div>
         )}
+        {state.player.pityCounter >= 2 && (
+          <div className="card pity-hint">
+            <small className="dim"><Icon name="spark" size={14} /> 已连空 <span className="num">{state.player.pityCounter}</span> 次,再专注 <span className="num">{5 - state.player.pityCounter}</span> 次必得蛋</small>
+          </div>
+        )}
         {showCreate && <CreateQuestModal onClose={() => setShowCreate(false)} />}
         {showWheel && <Wheel onClose={() => setShowWheel(false)} />}
         {showFarm && <Farm onClose={() => setShowFarm(false)} />}
